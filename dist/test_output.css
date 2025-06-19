@@ -1,0 +1,9 @@
+/* src/test_input.css */
+/* src/test_base.css */
+.test-base-class {
+  color: #ff0000;
+  font-size: 16px;
+}
+.test-main-class {
+  background-color: green;
+}

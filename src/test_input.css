@@ -1,0 +1,6 @@
+/* src/test_input.css */
+@import "test_base.css";
+
+.test-main-class {
+  background-color: green;
+}
