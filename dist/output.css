@@ -1,18 +1,15 @@
+/* src/input.css */
 /* src/base.css */
-
 /*
   A very minimal CSS reset (similar to Normalize.css or Tailwind's Preflight).
   This aims to provide a consistent baseline across browsers.
 */
-
 *,
 *::before,
 *::after {
   box-sizing: border-box; /* All elements have box-sizing applied consistently */
 }
-
 /* Remove default margin and padding from common elements */
-
 body,
 h1,
 h2,
@@ -32,16 +29,12 @@ dd {
   margin: 0;
   padding: 0;
 }
-
 /* Remove list styles (dots/numbers) on ul, ol that have no class */
-
 ul:not([class]),
 ol:not([class]) {
   list-style: none;
 }
-
 /* Inherit font-family and line-height for better accessibility */
-
 body {
   font-family:
     system-ui,
@@ -59,9 +52,7 @@ body {
   -webkit-font-smoothing: antialiased; /* Better font rendering on macOS */
   -moz-osx-font-smoothing: grayscale; /* Better font rendering on macOS */
 }
-
 /* Make images easier to work with */
-
 img,
 picture,
 video,
@@ -70,9 +61,7 @@ svg {
   display: block; /* Removes extra space below images */
   max-width: 100%; /* Ensures images scale down within containers */
 }
-
 /* Remove default button styles */
-
 button,
 input,
 optgroup,
@@ -83,34 +72,41 @@ textarea {
   line-height: 1.15;
   margin: 0;
 }
-
 /* Remove default table cell padding */
-
 table {
   border-collapse: collapse;
 }
-
 th,
 td {
   padding: 0;
 }
-
-/* src/input.css */
-
-/* Import your base styles (the CSS reset) */
-
-/* Example custom CSS or component styles */
-
-.my-custom-component {
-  background-color: lightgray;
-  padding: 1rem;
+.container {
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  background-color: #f3f4f6;
 }
-
-/* You can also use your RelaxCSS @apply here */
-
-.my-button {
-  background-color: #3b82f6;
-  color: #ffffff;
-  padding: 0.5rem;
-  border-radius: 0.375rem;
+.box {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+  .box {
+    background-color: #1f2937;
+  }
+}
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
 }

@@ -2,64 +2,172 @@
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-const postcss_1 = __importDefault(require("postcss"));
-// --- Updated defaultConfig (More comprehensive) ---
+const postcss_1 = require("postcss");
+const lodash_merge_1 = __importDefault(require("lodash.merge"));
 const defaultConfig = {
     theme: {
-        colors: {
-            primary: "#3490dc",
-            secondary: "#ffed4a",
-            "red-500": "#ef4444",
-            "blue-500": "#3b82f6",
-            tertiary: "#805ad5",
-            white: "#ffffff",
-            black: "#000000",
-            transparent: "transparent",
-            // Add more common colors as needed
-        },
-        spacing: {
-            "0": "0rem",
-            px: "1px",
-            "0.5": "0.125rem",
-            "1": "0.25rem",
-            "1.5": "0.375rem",
-            "2": "0.5rem",
-            "2.5": "0.625rem",
-            "3": "0.75rem",
-            "3.5": "0.875rem",
-            "4": "1rem",
-            "5": "1.25rem",
-            "6": "1.5rem",
-            "8": "2rem",
-            "10": "2.5rem",
-            "12": "3rem",
-            "16": "4rem",
-            "20": "5rem",
-            "24": "6rem",
-            "32": "8rem",
-            "40": "10rem",
-            "48": "12rem",
-            "56": "14rem",
-            "64": "16rem",
-            "72": "18rem",
-            "80": "20rem",
-            "96": "24rem",
-            // For width/height:
-            "1/2": "50%",
-            "1/3": "33.333333%",
-            "2/3": "66.666667%",
-            "1/4": "25%",
-            "3/4": "75%",
-            full: "100%",
-            screen: "100vw", // Added for screen width/height
-        },
         screens: {
             sm: "640px",
             md: "768px",
             lg: "1024px",
-            xl: "1280px", // Added
-            "2xl": "1536px", // Added
+            xl: "1280px",
+            "2xl": "1536px",
+        },
+        spacing: {
+            px: "1px",
+            0: "0px",
+            0.5: "0.125rem",
+            1: "0.25rem",
+            1.5: "0.375rem",
+            2: "0.5rem",
+            2.5: "0.625rem",
+            3: "0.75rem",
+            3.5: "0.875rem",
+            4: "1rem",
+            5: "1.25rem",
+            6: "1.5rem",
+            7: "1.75rem",
+            8: "2rem",
+            9: "2.25rem",
+            10: "2.5rem",
+            11: "2.75rem",
+            12: "3rem",
+            14: "3.5rem",
+            16: "4rem",
+            20: "5rem",
+            24: "6rem",
+            28: "7rem",
+            32: "8rem",
+            36: "9rem",
+            40: "10rem",
+            44: "11rem",
+            48: "12rem",
+            52: "13rem",
+            56: "14rem",
+            60: "15rem",
+            64: "16rem",
+            72: "18rem",
+            80: "20rem",
+            96: "24rem",
+            "1/2": "50%",
+            "1/3": "33.333333%",
+            "2/3": "66.666667%",
+            "1/4": "25%",
+            "2/4": "50%",
+            "3/4": "75%",
+            full: "100%",
+            auto: "auto", // Added 'auto' to spacing for m-auto
+            // Note: '7xl' should be here if max-w-7xl uses spacing.
+            // If it uses a dedicated maxWidth scale, it's defined there.
+        },
+        colors: {
+            transparent: "transparent",
+            current: "currentColor",
+            black: "#000",
+            white: "#fff",
+            gray: {
+                50: "#f9fafb",
+                100: "#f3f4f6",
+                200: "#e5e7eb",
+                300: "#d1d5db",
+                400: "#9ca3af",
+                500: "#6b7280",
+                600: "#4b5563",
+                700: "#374151",
+                800: "#1f2937",
+                900: "#111827",
+            },
+            blue: {
+                50: "#eff6ff",
+                100: "#dbeafe",
+                200: "#bfdbfe",
+                300: "#93c5fd",
+                400: "#60a5fa",
+                500: "#3b82f6",
+                600: "#2563eb",
+                700: "#1d4ed8",
+                800: "#1e40af",
+                900: "#1e3a8a",
+            },
+            // Add more colors if needed
+        },
+        fontSize: {
+            xs: ["0.75rem", { lineHeight: "1rem" }],
+            sm: ["0.875rem", { lineHeight: "1.25rem" }],
+            base: ["1rem", { lineHeight: "1.5rem" }],
+            lg: ["1.125rem", { lineHeight: "1.75rem" }],
+            xl: ["1.25rem", { lineHeight: "1.75rem" }],
+            "2xl": ["1.5rem", { lineHeight: "2rem" }],
+            "3xl": ["1.875rem", { lineHeight: "2.25rem" }],
+            "4xl": ["2.25rem", { lineHeight: "2.5rem" }],
+            "5xl": ["3rem", { lineHeight: "1" }],
+            "6xl": ["3.75rem", { lineHeight: "1" }],
+            "7xl": ["4.5rem", { lineHeight: "1" }],
+            "8xl": ["6rem", { lineHeight: "1" }],
+            "9xl": ["8rem", { lineHeight: "1" }],
+        },
+        fontWeight: {
+            thin: "100",
+            extralight: "200",
+            light: "300",
+            normal: "400",
+            medium: "500",
+            semibold: "600",
+            bold: "700",
+            extrabold: "800",
+            black: "900",
+        },
+        lineHeight: {
+            none: "1",
+            tight: "1.25",
+            snug: "1.375",
+            normal: "1.5",
+            relaxed: "1.625",
+            loose: "2",
+            3: ".75rem",
+            4: "1rem",
+            5: "1.25rem",
+            6: "1.5rem",
+            7: "1.75rem",
+            8: "2rem",
+            9: "2.25rem",
+            10: "2.5rem",
+        },
+        boxShadow: {
+            sm: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+            DEFAULT: "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+            md: "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+            lg: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+            xl: "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+            "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+            inner: "inset 0 2px 4px 0 rgb(0 0 0 / 0.05)",
+            none: "none",
+        },
+        zIndex: {
+            0: "0",
+            10: "10",
+            20: "20",
+            30: "30",
+            40: "40",
+            50: "50",
+            auto: "auto",
+        },
+        opacity: {
+            0: "0",
+            5: "0.05",
+            10: "0.1",
+            20: "0.2",
+            25: "0.25",
+            30: "0.3",
+            40: "0.4",
+            50: "0.5",
+            60: "0.6",
+            70: "0.7",
+            75: "0.75",
+            80: "0.8",
+            90: "0.9",
+            95: "0.95",
+            100: "1",
         },
         borderRadius: {
             none: "0",
@@ -72,66 +180,73 @@ const defaultConfig = {
             "3xl": "1.5rem",
             full: "9999px",
         },
-        fontSizes: {
-            xs: "0.75rem",
-            sm: "0.875rem",
-            base: "1rem",
-            lg: "1.125rem",
-            xl: "1.25rem",
-            "2xl": "1.5rem",
-            "3xl": "1.875rem",
-            "4xl": "2.25rem",
-            "5xl": "3rem",
-            "6xl": "3.75rem",
+        borderWidth: {
+            DEFAULT: "1px",
+            0: "0px",
+            2: "2px",
+            4: "4px",
+            8: "8px",
         },
-        fontWeights: {
-            thin: "100",
-            extralight: "200",
-            light: "300",
-            normal: "400",
-            medium: "500",
-            semibold: "600",
-            bold: "700",
-            extrabold: "800",
-            black: "900",
+        gridTemplateColumns: {
+            none: "none",
+            1: "repeat(1, minmax(0, 1fr))",
+            2: "repeat(2, minmax(0, 1fr))",
+            3: "repeat(3, minmax(0, 1fr))",
+            4: "repeat(4, minmax(0, 1fr))",
+            5: "repeat(5, minmax(0, 1fr))",
+            6: "repeat(6, minmax(0, 1fr))",
+            7: "repeat(7, minmax(0, 1fr))",
+            8: "repeat(8, minmax(0, 1fr))",
+            9: "repeat(9, minmax(0, 1fr))",
+            10: "repeat(10, minmax(0, 1fr))",
+            11: "repeat(11, minmax(0, 1fr))",
+            12: "repeat(12, minmax(0, 1fr))",
         },
-        lineHeights: {
-            none: "1",
-            tight: "1.25",
-            snug: "1.375",
-            normal: "1.5",
-            relaxed: "1.625",
-            loose: "2",
-            "3": ".75rem", // For fixed line heights
-            "4": "1rem",
-            "5": "1.25rem",
-            "6": "1.5rem",
-            "7": "1.75rem",
-            "8": "2rem",
-            "9": "2.25rem",
-            "10": "2.5rem",
+        gridTemplateRows: {
+            none: "none",
+            1: "repeat(1, minmax(0, 1fr))",
+            2: "repeat(2, minmax(0, 1fr))",
+            3: "repeat(3, minmax(0, 1fr))",
+            4: "repeat(4, minmax(0, 1fr))",
+            5: "repeat(5, minmax(0, 1fr))",
+            6: "repeat(6, minmax(0, 1fr))",
         },
-        boxShadow: {
-            sm: "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
-            DEFAULT: "0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)",
-            md: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-            lg: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
-            xl: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-            "2xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-            inner: "inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)",
+        flex: {
+            1: "1 1 0%",
+            auto: "1 1 auto",
+            initial: "0 1 auto",
             none: "none",
         },
-        zIndex: {
-            "0": "0",
-            "10": "10",
-            "20": "20",
-            "30": "30",
-            "40": "40",
-            "50": "50",
-            auto: "auto",
+        transitionProperty: {
+            none: "none",
+            all: "all",
+            DEFAULT: "color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter",
+            colors: "color, background-color, border-color, text-decoration-color, fill, stroke",
+            opacity: "opacity",
+            shadow: "box-shadow",
+            transform: "transform",
+        },
+        transitionDuration: {
+            DEFAULT: "150ms",
+            75: "75ms",
+            100: "100ms",
+            150: "150ms",
+            200: "200ms",
+            300: "300ms",
+            500: "500ms",
+            700: "700ms",
+            1000: "1000ms",
+        },
+        transitionTimingFunction: {
+            DEFAULT: "cubic-bezier(0.4, 0, 0.2, 1)",
+            linear: "linear",
+            in: "cubic-bezier(0.4, 0, 1, 1)",
+            out: "cubic-bezier(0, 0, 0.2, 1)",
+            "in-out": "cubic-bezier(0.4, 0, 0.2, 1)",
         },
         maxWidth: {
-            "0": "0rem",
+            0: "0rem",
+            none: "none",
             xs: "20rem",
             sm: "24rem",
             md: "28rem",
@@ -142,7 +257,7 @@ const defaultConfig = {
             "4xl": "56rem",
             "5xl": "64rem",
             "6xl": "72rem",
-            "7xl": "80rem",
+            "7xl": "80rem", // Explicitly added for max-w-7xl
             full: "100%",
             min: "min-content",
             max: "max-content",
@@ -153,1108 +268,1165 @@ const defaultConfig = {
             "screen-xl": "1280px",
             "screen-2xl": "1536px",
         },
-        minWidth: {
-            "0": "0rem",
+        maxHeight: {
+            0: "0rem",
+            none: "none",
             full: "100%",
+            screen: "100vh",
             min: "min-content",
             max: "max-content",
-        },
-        maxHeight: {
-            full: "100%",
-            screen: "100vh",
-        },
-        minHeight: {
-            "0": "0rem",
-            full: "100%",
-            screen: "100vh",
+            fit: "fit-content",
         },
     },
     variants: {
-        responsive: ["sm", "md", "lg", "xl", "2xl"], // Added new breakpoints
-        pseudoClass: ["hover", "focus", "active", "disabled", "visited"], // Added more pseudo-classes
+        responsive: ["sm", "md", "lg", "xl", "2xl"],
+        pseudoClasses: [
+            "hover",
+            "focus",
+            "active",
+            "visited",
+            "first",
+            "last",
+            "odd",
+            "even",
+            "focus-within", // Added this common variant
+            "disabled", // Added this common variant
+            "group-hover", // Added this common variant
+        ],
     },
 };
-function relaxcss(opts = {}) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
-    let userConfig;
-    if (opts.config) {
-        try {
-            const loadedConfig = require(opts.config);
-            // Deep merge for theme properties
-            userConfig = {
-                ...defaultConfig,
-                theme: {
-                    ...defaultConfig.theme,
-                    ...loadedConfig.theme, // This shallow merges, we need deeper for nested objects
-                    // Explicitly deep merge nested theme objects
-                    screens: {
-                        ...defaultConfig.theme.screens,
-                        ...(((_a = loadedConfig.theme) === null || _a === void 0 ? void 0 : _a.screens) || {}),
-                    },
-                    colors: {
-                        ...defaultConfig.theme.colors,
-                        ...(((_b = loadedConfig.theme) === null || _b === void 0 ? void 0 : _b.colors) || {}),
-                    },
-                    spacing: {
-                        ...defaultConfig.theme.spacing,
-                        ...(((_c = loadedConfig.theme) === null || _c === void 0 ? void 0 : _c.spacing) || {}),
-                    },
-                    borderRadius: {
-                        ...defaultConfig.theme.borderRadius,
-                        ...(((_d = loadedConfig.theme) === null || _d === void 0 ? void 0 : _d.borderRadius) || {}),
-                    },
-                    fontSizes: {
-                        ...defaultConfig.theme.fontSizes,
-                        ...(((_e = loadedConfig.theme) === null || _e === void 0 ? void 0 : _e.fontSizes) || {}),
-                    },
-                    fontWeights: {
-                        ...defaultConfig.theme.fontWeights,
-                        ...(((_f = loadedConfig.theme) === null || _f === void 0 ? void 0 : _f.fontWeights) || {}),
-                    },
-                    lineHeights: {
-                        ...defaultConfig.theme.lineHeights,
-                        ...(((_g = loadedConfig.theme) === null || _g === void 0 ? void 0 : _g.lineHeights) || {}),
-                    },
-                    boxShadow: {
-                        ...defaultConfig.theme.boxShadow,
-                        ...(((_h = loadedConfig.theme) === null || _h === void 0 ? void 0 : _h.boxShadow) || {}),
-                    },
-                    zIndex: {
-                        ...defaultConfig.theme.zIndex,
-                        ...(((_j = loadedConfig.theme) === null || _j === void 0 ? void 0 : _j.zIndex) || {}),
-                    },
-                    maxWidth: {
-                        ...defaultConfig.theme.maxWidth,
-                        ...(((_k = loadedConfig.theme) === null || _k === void 0 ? void 0 : _k.maxWidth) || {}),
-                    },
-                    minWidth: {
-                        ...defaultConfig.theme.minWidth,
-                        ...(((_l = loadedConfig.theme) === null || _l === void 0 ? void 0 : _l.minWidth) || {}),
-                    },
-                    maxHeight: {
-                        ...defaultConfig.theme.maxHeight,
-                        ...(((_m = loadedConfig.theme) === null || _m === void 0 ? void 0 : _m.maxHeight) || {}),
-                    },
-                    minHeight: {
-                        ...defaultConfig.theme.minHeight,
-                        ...(((_o = loadedConfig.theme) === null || _o === void 0 ? void 0 : _o.minHeight) || {}),
-                    },
-                },
-                variants: {
-                    ...defaultConfig.variants,
-                    ...(loadedConfig.variants || {}), // Variants can be shallow merged
-                },
-            };
-            // Ensure variant arrays are merged, not overwritten, unless explicitly defined
-            if (loadedConfig.variants) {
-                if (loadedConfig.variants.responsive) {
-                    // If responsive is an array, use it; otherwise, default to current (merged)
-                    if (Array.isArray(loadedConfig.variants.responsive)) {
-                        userConfig.variants.responsive = loadedConfig.variants.responsive;
+// --- 2. Helper Functions ---
+// Universal getter for theme values
+function get(obj, path, defaultValue) {
+    const travel = (regexp) => String.prototype.split
+        .call(path, regexp)
+        .filter(Boolean)
+        .reduce((res, key) => (res !== null && res !== undefined ? res[key] : res), obj);
+    const result = travel(/[,[\]].?|[/.]/);
+    return result === undefined || result === obj ? defaultValue : result;
+}
+/**
+ * Generates CSS declarations for a given utility class name.
+ * @param className The utility class name (e.g., 'text-blue-500', 'p-4', 'sm:flex').
+ * @param config The merged RelaxCSS configuration.
+ * @returns An array of PostCSS Declaration nodes.
+ */
+function generateUtilityCss(className, config) {
+    var _a;
+    const declarations = [];
+    const arbitraryMatch = className.match(/^\[(.*?)\]$/);
+    if (arbitraryMatch) {
+        // For arbitrary values like `w-[100px]`
+        return []; // These are typically handled by `parseValue` if it's aware of them.
+        // For this context, assuming direct utility generation from named classes.
+    }
+    const getColor = (colorName) => {
+        const parts = colorName.split("-");
+        if (parts.length === 2 &&
+            get(config.theme.colors, parts[0]) &&
+            get(config.theme.colors, `${parts[0]}.${parts[1]}`)) {
+            return get(config.theme.colors, `${parts[0]}.${parts[1]}`);
+        }
+        const color = get(config.theme.colors, colorName);
+        return typeof color === "string" ? color : undefined;
+    };
+    // Helper for applying spacing-based properties
+    const applySpacingProperty = (propBase, valueKey, axisOrSide) => {
+        const value = get(config.theme.spacing, valueKey);
+        if (value === undefined && valueKey !== "auto")
+            return; // Allow 'auto' for margin
+        const finalValue = valueKey === "auto" && propBase.startsWith("margin") ? "auto" : value;
+        switch (axisOrSide) {
+            case "x":
+                declarations.push(new postcss_1.Declaration({ prop: `${propBase}-left`, value: finalValue }), new postcss_1.Declaration({ prop: `${propBase}-right`, value: finalValue }));
+                break;
+            case "y":
+                declarations.push(new postcss_1.Declaration({ prop: `${propBase}-top`, value: finalValue }), new postcss_1.Declaration({ prop: `${propBase}-bottom`, value: finalValue }));
+                break;
+            case "t":
+                declarations.push(new postcss_1.Declaration({ prop: `${propBase}-top`, value: finalValue }));
+                break;
+            case "r":
+                declarations.push(new postcss_1.Declaration({ prop: `${propBase}-right`, value: finalValue }));
+                break;
+            case "b":
+                declarations.push(new postcss_1.Declaration({ prop: `${propBase}-bottom`, value: finalValue }));
+                break;
+            case "l":
+                declarations.push(new postcss_1.Declaration({ prop: `${propBase}-left`, value: finalValue }));
+                break;
+            default: // No axis or side, apply to all
+                declarations.push(new postcss_1.Declaration({ prop: propBase, value: finalValue }));
+                break;
+        }
+    };
+    // Parse class name into prefix and suffix
+    const dashIndex = className.indexOf("-");
+    let prefix = className;
+    let suffix = "";
+    if (dashIndex !== -1) {
+        prefix = className.substring(0, dashIndex);
+        suffix = className.substring(dashIndex + 1);
+    }
+    // Handle complex cases with specific logic first
+    if (className.startsWith("p-") || className.startsWith("m-")) {
+        const match = className.match(/^(p|m)(x|y|t|r|b|l)?-(.+)$/);
+        if (match) {
+            const propType = match[1] === "p" ? "padding" : "margin";
+            const axisOrSide = match[2];
+            const valueKey = match[3];
+            applySpacingProperty(propType, valueKey, axisOrSide);
+        }
+    }
+    else if (className.startsWith("px-")) {
+        applySpacingProperty("padding", className.substring(3), "x");
+    }
+    else if (className.startsWith("py-")) {
+        applySpacingProperty("padding", className.substring(3), "y");
+    }
+    else if (className.startsWith("pt-")) {
+        applySpacingProperty("padding", className.substring(3), "t");
+    }
+    else if (className.startsWith("pr-")) {
+        applySpacingProperty("padding", className.substring(3), "r");
+    }
+    else if (className.startsWith("pb-")) {
+        applySpacingProperty("padding", className.substring(3), "b");
+    }
+    else if (className.startsWith("pl-")) {
+        applySpacingProperty("padding", className.substring(3), "l");
+    }
+    else if (className.startsWith("mx-")) {
+        applySpacingProperty("margin", className.substring(3), "x");
+    }
+    else if (className.startsWith("my-")) {
+        applySpacingProperty("margin", className.substring(3), "y");
+    }
+    else if (className.startsWith("mt-")) {
+        applySpacingProperty("margin", className.substring(3), "t");
+    }
+    else if (className.startsWith("mr-")) {
+        applySpacingProperty("margin", className.substring(3), "r");
+    }
+    else if (className.startsWith("mb-")) {
+        applySpacingProperty("margin", className.substring(3), "b");
+    }
+    else if (className.startsWith("ml-")) {
+        applySpacingProperty("margin", className.substring(3), "l");
+    }
+    else if (className.startsWith("max-w-")) {
+        const value = get(config.theme.maxWidth, suffix);
+        if (value !== undefined)
+            declarations.push(new postcss_1.Declaration({ prop: "max-width", value }));
+    }
+    else if (className.startsWith("max-h-")) {
+        const value = get(config.theme.maxHeight, suffix);
+        if (value !== undefined)
+            declarations.push(new postcss_1.Declaration({ prop: "max-height", value }));
+    }
+    // All other utilities handled by a switch or direct lookup
+    else {
+        switch (prefix) {
+            case "text":
+                // Handle text color (e.g., text-blue-500)
+                if (suffix.includes("-")) {
+                    const colorValue = getColor(suffix);
+                    if (colorValue)
+                        declarations.push(new postcss_1.Declaration({ prop: "color", value: colorValue }));
+                }
+                else {
+                    // Handle font size (e.g., text-xl)
+                    const fontSizeTuple = get(config.theme.fontSize, suffix);
+                    if (Array.isArray(fontSizeTuple)) {
+                        declarations.push(new postcss_1.Declaration({ prop: "font-size", value: fontSizeTuple[0] }));
+                        if ((_a = fontSizeTuple[1]) === null || _a === void 0 ? void 0 : _a.lineHeight) {
+                            declarations.push(new postcss_1.Declaration({
+                                prop: "line-height",
+                                value: fontSizeTuple[1].lineHeight,
+                            }));
+                        }
                     }
                 }
-                if (loadedConfig.variants.pseudoClass) {
-                    // If pseudoClass is an array, use it; otherwise, default to current (merged)
-                    if (Array.isArray(loadedConfig.variants.pseudoClass)) {
-                        userConfig.variants.pseudoClass = loadedConfig.variants.pseudoClass;
+                break;
+            case "bg":
+                // Handle background color (e.g., bg-blue-500)
+                if (suffix.includes("-")) {
+                    const colorValue = getColor(suffix);
+                    if (colorValue)
+                        declarations.push(new postcss_1.Declaration({ prop: "background-color", value: colorValue }));
+                }
+                // Handle other bg-* utilities
+                else if (suffix === "fixed")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-attachment", value: "fixed" }));
+                else if (suffix === "local")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-attachment", value: "local" }));
+                else if (suffix === "scroll")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-attachment", value: "scroll" }));
+                else if (suffix.startsWith("clip-")) {
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "background-clip",
+                        value: suffix.substring(5),
+                    }));
+                }
+                else if (suffix.startsWith("origin-")) {
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "background-origin",
+                        value: suffix.substring(7),
+                    }));
+                }
+                else if (["bottom", "center", "left", "right", "top"].includes(suffix)) {
+                    declarations.push(new postcss_1.Declaration({ prop: "background-position", value: suffix }));
+                }
+                else if (suffix.match(/^(left|right|top|bottom)-(top|bottom|left|right)$/)) {
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "background-position",
+                        value: suffix.replace("-", " "),
+                    }));
+                }
+                else if (suffix === "no-repeat")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-repeat", value: "no-repeat" }));
+                else if (suffix === "repeat")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-repeat", value: "repeat" }));
+                else if (suffix === "repeat-x")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-repeat", value: "repeat-x" }));
+                else if (suffix === "repeat-y")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-repeat", value: "repeat-y" }));
+                else if (suffix === "round")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-repeat", value: "round" }));
+                else if (suffix === "space")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-repeat", value: "space" }));
+                else if (suffix === "auto")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-size", value: "auto" }));
+                else if (suffix === "cover")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-size", value: "cover" }));
+                else if (suffix === "contain")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-size", value: "contain" }));
+                else if (suffix === "none")
+                    declarations.push(new postcss_1.Declaration({ prop: "background-image", value: "none" }));
+                else if (suffix.startsWith("gradient-to-")) {
+                    const direction = suffix.substring(12);
+                    const gradientMap = {
+                        t: "to top",
+                        tr: "to top right",
+                        r: "to right",
+                        br: "to bottom right",
+                        b: "to bottom",
+                        bl: "to bottom left",
+                        l: "to left",
+                        tl: "to top left",
+                    };
+                    if (gradientMap[direction]) {
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "background-image",
+                            value: `linear-gradient(${gradientMap[direction]}, var(--tw-gradient-stops))`,
+                        }));
                     }
                 }
+                break;
+            case "font":
+                const fontWeightValue = get(config.theme.fontWeight, suffix);
+                if (fontWeightValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "font-weight", value: fontWeightValue }));
+                break;
+            case "leading":
+                const lineHeightValue = get(config.theme.lineHeight, suffix);
+                if (lineHeightValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "line-height", value: lineHeightValue }));
+                break;
+            case "shadow":
+                const shadowValue = get(config.theme.boxShadow, suffix || "DEFAULT");
+                if (shadowValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "box-shadow", value: shadowValue }));
+                break;
+            case "z":
+                const zIndexValue = get(config.theme.zIndex, suffix);
+                if (zIndexValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "z-index", value: zIndexValue }));
+                break;
+            case "opacity":
+                const opacityValue = get(config.theme.opacity, suffix);
+                if (opacityValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "opacity", value: opacityValue }));
+                break;
+            case "rounded":
+                const borderRadiusValue = get(config.theme.borderRadius, suffix || "DEFAULT");
+                if (borderRadiusValue !== undefined) {
+                    if (suffix.startsWith("t-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-top-left-radius",
+                            value: borderRadiusValue,
+                        }), new postcss_1.Declaration({
+                            prop: "border-top-right-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("b-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-bottom-left-radius",
+                            value: borderRadiusValue,
+                        }), new postcss_1.Declaration({
+                            prop: "border-bottom-right-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("l-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-top-left-radius",
+                            value: borderRadiusValue,
+                        }), new postcss_1.Declaration({
+                            prop: "border-bottom-left-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("r-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-top-right-radius",
+                            value: borderRadiusValue,
+                        }), new postcss_1.Declaration({
+                            prop: "border-bottom-right-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("tl-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-top-left-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("tr-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-top-right-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("bl-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-bottom-left-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else if (suffix.startsWith("br-"))
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-bottom-right-radius",
+                            value: borderRadiusValue,
+                        }));
+                    else
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "border-radius",
+                            value: borderRadiusValue,
+                        }));
+                }
+                break;
+            case "border":
+                if (suffix.includes("-")) {
+                    // border-color (e.g., border-red-500)
+                    const colorValue = getColor(suffix);
+                    if (colorValue)
+                        declarations.push(new postcss_1.Declaration({ prop: "border-color", value: colorValue }));
+                    else {
+                        // border-width (e.g., border-2)
+                        const widthValue = get(config.theme.borderWidth, suffix);
+                        if (widthValue !== undefined)
+                            declarations.push(new postcss_1.Declaration({ prop: "border-width", value: widthValue }));
+                    }
+                }
+                else {
+                    // border (default width)
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "border-width",
+                        value: get(config.theme.borderWidth, "DEFAULT"),
+                    }), new postcss_1.Declaration({ prop: "border-style", value: "solid" }), new postcss_1.Declaration({ prop: "border-color", value: "currentColor" }));
+                }
+                break;
+            case "grid":
+                if (suffix === "cols") {
+                    const value = get(config.theme.gridTemplateColumns, suffix);
+                    if (value)
+                        declarations.push(new postcss_1.Declaration({ prop: "grid-template-columns", value }));
+                }
+                else if (suffix === "rows") {
+                    const value = get(config.theme.gridTemplateRows, suffix);
+                    if (value)
+                        declarations.push(new postcss_1.Declaration({ prop: "grid-template-rows", value }));
+                }
+                else if (suffix === "") {
+                    // display: grid
+                    declarations.push(new postcss_1.Declaration({ prop: "display", value: "grid" }));
+                }
+                break;
+            case "col":
+                if (suffix.startsWith("span-")) {
+                    const span = get(config.theme.spacing, suffix.substring(5)); // Using spacing for numbers
+                    if (span)
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "grid-column",
+                            value: `span ${span} / span ${span}`,
+                        }));
+                }
+                else if (suffix.startsWith("start-")) {
+                    const start = get(config.theme.spacing, suffix.substring(6));
+                    if (start)
+                        declarations.push(new postcss_1.Declaration({ prop: "grid-column-start", value: start }));
+                }
+                else if (suffix.startsWith("end-")) {
+                    const end = get(config.theme.spacing, suffix.substring(4));
+                    if (end)
+                        declarations.push(new postcss_1.Declaration({ prop: "grid-column-end", value: end }));
+                }
+                else if (suffix === "auto") {
+                    declarations.push(new postcss_1.Declaration({ prop: "grid-column", value: "auto" }));
+                }
+                break;
+            case "row":
+                if (suffix.startsWith("span-")) {
+                    const span = get(config.theme.spacing, suffix.substring(5));
+                    if (span)
+                        declarations.push(new postcss_1.Declaration({
+                            prop: "grid-row",
+                            value: `span ${span} / span ${span}`,
+                        }));
+                }
+                else if (suffix.startsWith("start-")) {
+                    const start = get(config.theme.spacing, suffix.substring(6));
+                    if (start)
+                        declarations.push(new postcss_1.Declaration({ prop: "grid-row-start", value: start }));
+                }
+                else if (suffix.startsWith("end-")) {
+                    const end = get(config.theme.spacing, suffix.substring(4));
+                    if (end)
+                        declarations.push(new postcss_1.Declaration({ prop: "grid-row-end", value: end }));
+                }
+                else if (suffix === "auto") {
+                    declarations.push(new postcss_1.Declaration({ prop: "grid-row", value: "auto" }));
+                }
+                break;
+            case "gap":
+                if (suffix.startsWith("x-")) {
+                    const value = get(config.theme.spacing, suffix.substring(2));
+                    if (value)
+                        declarations.push(new postcss_1.Declaration({ prop: "column-gap", value }));
+                }
+                else if (suffix.startsWith("y-")) {
+                    const value = get(config.theme.spacing, suffix.substring(2));
+                    if (value)
+                        declarations.push(new postcss_1.Declaration({ prop: "row-gap", value }));
+                }
+                else {
+                    const value = get(config.theme.spacing, suffix);
+                    if (value)
+                        declarations.push(new postcss_1.Declaration({ prop: "gap", value }));
+                }
+                break;
+            case "auto":
+                if (suffix.startsWith("cols-")) {
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "grid-auto-columns",
+                        value: suffix.substring(5),
+                    }));
+                }
+                else if (suffix.startsWith("rows-")) {
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "grid-auto-rows",
+                        value: suffix.substring(5),
+                    }));
+                }
+                break;
+            case "static":
+                declarations.push(new postcss_1.Declaration({ prop: "position", value: "static" }));
+                break;
+            case "relative":
+                declarations.push(new postcss_1.Declaration({ prop: "position", value: "relative" }));
+                break;
+            case "absolute":
+                declarations.push(new postcss_1.Declaration({ prop: "position", value: "absolute" }));
+                break;
+            case "fixed":
+                declarations.push(new postcss_1.Declaration({ prop: "position", value: "fixed" }));
+                break;
+            case "sticky":
+                declarations.push(new postcss_1.Declaration({ prop: "position", value: "sticky" }));
+                break;
+            case "top":
+            case "right":
+            case "bottom":
+            case "left":
+                const positionValue = get(config.theme.spacing, suffix);
+                if (positionValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: prefix, value: positionValue }));
+                break;
+            case "inset":
+                if (suffix.startsWith("x-")) {
+                    const value = get(config.theme.spacing, suffix.substring(2));
+                    if (value !== undefined)
+                        declarations.push(new postcss_1.Declaration({ prop: "left", value }), new postcss_1.Declaration({ prop: "right", value }));
+                }
+                else if (suffix.startsWith("y-")) {
+                    const value = get(config.theme.spacing, suffix.substring(2));
+                    if (value !== undefined)
+                        declarations.push(new postcss_1.Declaration({ prop: "top", value }), new postcss_1.Declaration({ prop: "bottom", value }));
+                }
+                else {
+                    const value = get(config.theme.spacing, suffix);
+                    if (value !== undefined)
+                        declarations.push(new postcss_1.Declaration({ prop: "top", value }), new postcss_1.Declaration({ prop: "right", value }), new postcss_1.Declaration({ prop: "bottom", value }), new postcss_1.Declaration({ prop: "left", value }));
+                }
+                break;
+            case "overflow":
+                if (suffix === "auto" ||
+                    suffix === "hidden" ||
+                    suffix === "visible" ||
+                    suffix === "scroll" ||
+                    suffix === "clip") {
+                    declarations.push(new postcss_1.Declaration({ prop: "overflow", value: suffix }));
+                }
+                else if (suffix.startsWith("x-")) {
+                    declarations.push(new postcss_1.Declaration({ prop: "overflow-x", value: suffix.substring(2) }));
+                }
+                else if (suffix.startsWith("y-")) {
+                    declarations.push(new postcss_1.Declaration({ prop: "overflow-y", value: suffix.substring(2) }));
+                }
+                break;
+            case "mix-blend":
+                declarations.push(new postcss_1.Declaration({ prop: "mix-blend-mode", value: suffix }));
+                break;
+            case "background-blend":
+                declarations.push(new postcss_1.Declaration({ prop: "background-blend-mode", value: suffix }));
+                break;
+            case "blur":
+            case "brightness":
+            case "contrast":
+            case "drop-shadow":
+            case "grayscale":
+            case "hue-rotate":
+            case "invert":
+            case "saturate":
+            case "sepia":
+            case "backdrop-blur":
+            case "backdrop-brightness":
+            case "backdrop-contrast":
+            case "backdrop-grayscale":
+            case "backdrop-hue-rotate":
+            case "backdrop-invert":
+            case "backdrop-opacity":
+            case "backdrop-saturate":
+            case "backdrop-sepia":
+                declarations.push(new postcss_1.Declaration({ prop: `--relax-filter`, value: `${className}` }));
+                break;
+            case "scale":
+            case "rotate":
+            case "translate":
+            case "skew":
+                declarations.push(new postcss_1.Declaration({ prop: `--relax-transform`, value: `${className}` }));
+                break;
+            case "origin":
+                declarations.push(new postcss_1.Declaration({
+                    prop: "transform-origin",
+                    value: suffix.replace("-", " "),
+                }));
+                break;
+            case "transition":
+                const prop = get(config.theme.transitionProperty, suffix || "DEFAULT");
+                if (prop !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "transition-property", value: prop }));
+                break;
+            case "duration":
+                const duration = get(config.theme.transitionDuration, suffix);
+                if (duration !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "transition-duration", value: duration }));
+                break;
+            case "ease":
+                const timingFunction = get(config.theme.transitionTimingFunction, suffix || "DEFAULT");
+                if (timingFunction !== undefined)
+                    declarations.push(new postcss_1.Declaration({
+                        prop: "transition-timing-function",
+                        value: timingFunction,
+                    }));
+                break;
+            case "delay":
+                const delayValue = get(config.theme.transitionDuration, suffix); // Use duration scale for delays
+                if (delayValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "transition-delay", value: delayValue }));
+                break;
+            case "pointer-events":
+                declarations.push(new postcss_1.Declaration({ prop: "pointer-events", value: suffix }));
+                break;
+            case "cursor":
+                declarations.push(new postcss_1.Declaration({ prop: "cursor", value: suffix }));
+                break;
+            case "resize":
+                if (suffix === "")
+                    declarations.push(new postcss_1.Declaration({ prop: "resize", value: "both" }));
+                else if (suffix === "x")
+                    declarations.push(new postcss_1.Declaration({ prop: "resize", value: "horizontal" }));
+                else if (suffix === "y")
+                    declarations.push(new postcss_1.Declaration({ prop: "resize", value: "vertical" }));
+                else if (suffix === "none")
+                    declarations.push(new postcss_1.Declaration({ prop: "resize", value: "none" }));
+                break;
+            case "select":
+                declarations.push(new postcss_1.Declaration({
+                    prop: "user-select",
+                    value: suffix.replace("-", ""),
+                }));
+                break;
+            case "sr":
+                if (suffix === "only") {
+                    declarations.push(new postcss_1.Declaration({ prop: "position", value: "absolute" }), new postcss_1.Declaration({ prop: "width", value: "1px" }), new postcss_1.Declaration({ prop: "height", value: "1px" }), new postcss_1.Declaration({ prop: "padding", value: "0" }), new postcss_1.Declaration({ prop: "margin", value: "-1px" }), new postcss_1.Declaration({ prop: "overflow", value: "hidden" }), new postcss_1.Declaration({ prop: "clip", value: "rect(0, 0, 0, 0)" }), new postcss_1.Declaration({ prop: "white-space", value: "nowrap" }), new postcss_1.Declaration({ prop: "border-width", value: "0" }));
+                }
+                break;
+            case "not":
+                if (suffix === "sr-only") {
+                    declarations.push(new postcss_1.Declaration({ prop: "position", value: "static" }), new postcss_1.Declaration({ prop: "width", value: "auto" }), new postcss_1.Declaration({ prop: "height", value: "auto" }), new postcss_1.Declaration({ prop: "padding", value: "0" }), new postcss_1.Declaration({ prop: "margin", value: "0" }), new postcss_1.Declaration({ prop: "overflow", value: "visible" }), new postcss_1.Declaration({ prop: "clip", value: "auto" }), new postcss_1.Declaration({ prop: "white-space", value: "normal" }));
+                }
+                break;
+            case "w": // width
+                const widthValue = get(config.theme.spacing, suffix);
+                if (widthValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "width", value: widthValue }));
+                break;
+            case "h": // height
+                const heightValue = get(config.theme.spacing, suffix);
+                if (heightValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "height", value: heightValue }));
+                break;
+            case "min-w":
+                const minWidthValue = get(config.theme.spacing, suffix);
+                if (minWidthValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "min-width", value: minWidthValue }));
+                break;
+            case "min-h":
+                const minHeightValue = get(config.theme.spacing, suffix);
+                if (minHeightValue !== undefined)
+                    declarations.push(new postcss_1.Declaration({ prop: "min-height", value: minHeightValue }));
+                break;
+            case "flex-grow":
+                if (suffix === "" || suffix === "0")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-grow", value: "0" }));
+                else
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-grow", value: "1" }));
+                break;
+            case "flex-shrink":
+                if (suffix === "" || suffix === "0")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-shrink", value: "0" }));
+                else
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-shrink", value: "1" }));
+                break;
+            case "justify-items":
+                declarations.push(new postcss_1.Declaration({ prop: "justify-items", value: suffix }));
+                break;
+            case "justify-self":
+                declarations.push(new postcss_1.Declaration({ prop: "justify-self", value: suffix }));
+                break;
+            case "place-items":
+                declarations.push(new postcss_1.Declaration({ prop: "place-items", value: suffix }));
+                break;
+            case "place-content":
+                declarations.push(new postcss_1.Declaration({ prop: "place-content", value: suffix }));
+                break;
+            case "place-self":
+                declarations.push(new postcss_1.Declaration({ prop: "place-self", value: suffix }));
+                break;
+            case "container": // Example of a pre-defined component/utility
+                // This is a special case as it's a class not directly from theme
+                // You might define this as a set of declarations
+                declarations.push(new postcss_1.Declaration({ prop: "width", value: "100%" }), new postcss_1.Declaration({ prop: "margin-right", value: "auto" }), new postcss_1.Declaration({ prop: "margin-left", value: "auto" })
+                // Responsive max-width would typically be handled by the user adding sm:max-w-xl etc.
+                );
+                break;
+            case "block":
+                declarations.push(new postcss_1.Declaration({ prop: "display", value: "block" }));
+                break;
+            case "inline":
+                declarations.push(new postcss_1.Declaration({ prop: "display", value: "inline" }));
+                break;
+            case "inline-block":
+                declarations.push(new postcss_1.Declaration({ prop: "display", value: "inline-block" }));
+                break;
+            case "hidden":
+                declarations.push(new postcss_1.Declaration({ prop: "display", value: "none" }));
+                break;
+            case "flex":
+                if (suffix === "")
+                    declarations.push(new postcss_1.Declaration({ prop: "display", value: "flex" }));
+                else if (suffix === "row")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-direction", value: "row" }));
+                else if (suffix === "col")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-direction", value: "column" }));
+                else if (suffix === "row-reverse")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-direction", value: "row-reverse" }));
+                else if (suffix === "col-reverse")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-direction", value: "column-reverse" }));
+                else if (suffix === "wrap")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-wrap", value: "wrap" }));
+                else if (suffix === "wrap-reverse")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-wrap", value: "wrap-reverse" }));
+                else if (suffix === "nowrap")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex-wrap", value: "nowrap" }));
+                else if (suffix === "1")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex", value: "1 1 0%" }));
+                else if (suffix === "auto")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex", value: "1 1 auto" }));
+                else if (suffix === "initial")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex", value: "0 1 auto" }));
+                else if (suffix === "none")
+                    declarations.push(new postcss_1.Declaration({ prop: "flex", value: "none" }));
+                break;
+            case "items":
+                if (suffix === "start")
+                    declarations.push(new postcss_1.Declaration({ prop: "align-items", value: "flex-start" }));
+                else if (suffix === "end")
+                    declarations.push(new postcss_1.Declaration({ prop: "align-items", value: "flex-end" }));
+                else if (suffix === "center")
+                    declarations.push(new postcss_1.Declaration({ prop: "align-items", value: "center" }));
+                else if (suffix === "baseline")
+                    declarations.push(new postcss_1.Declaration({ prop: "align-items", value: "baseline" }));
+                else if (suffix === "stretch")
+                    declarations.push(new postcss_1.Declaration({ prop: "align-items", value: "stretch" }));
+                break;
+            case "justify":
+                if (suffix === "start")
+                    declarations.push(new postcss_1.Declaration({ prop: "justify-content", value: "flex-start" }));
+                else if (suffix === "end")
+                    declarations.push(new postcss_1.Declaration({ prop: "justify-content", value: "flex-end" }));
+                else if (suffix === "center")
+                    declarations.push(new postcss_1.Declaration({ prop: "justify-content", value: "center" }));
+                else if (suffix === "between")
+                    declarations.push(new postcss_1.Declaration({ prop: "justify-content", value: "space-between" }));
+                else if (suffix === "around")
+                    declarations.push(new postcss_1.Declaration({ prop: "justify-content", value: "space-around" }));
+                else if (suffix === "evenly")
+                    declarations.push(new postcss_1.Declaration({ prop: "justify-content", value: "space-evenly" }));
+                break;
+            case "align-self":
+                declarations.push(new postcss_1.Declaration({ prop: "align-self", value: suffix }));
+                break;
+            case "box-border":
+                declarations.push(new postcss_1.Declaration({ prop: "box-sizing", value: "border-box" }));
+                break;
+            case "box-content":
+                declarations.push(new postcss_1.Declaration({ prop: "box-sizing", value: "content-box" }));
+                break;
+        }
+    }
+    // Fallback for direct color names as text/bg color if not caught above
+    if (declarations.length === 0) {
+        if (config.theme.colors[className]) {
+            // e.g., 'red' for text-red
+            const color = config.theme.colors[className];
+            if (typeof color === "string") {
+                declarations.push(new postcss_1.Declaration({ prop: "color", value: color }));
             }
         }
-        catch (e) {
-            console.error(`RelaxCSS: Could not load config file at ${opts.config}. Using default configuration.`, e);
-            userConfig = defaultConfig;
-        }
     }
-    else {
-        userConfig = defaultConfig;
-    }
-    // Helper to get variant prefix from a class string
-    const getVariant = (cls, variantTypes) => {
-        for (const v of variantTypes) {
-            if (cls.startsWith(`${v}:`))
-                return v;
-        }
-        return null;
-    };
+    return declarations;
+}
+// --- 3. PostCSS Plugin Core ---
+const plugin = (opts) => {
+    const mergedConfig = (0, lodash_merge_1.default)(defaultConfig, opts);
     return {
-        postcssPlugin: "relaxcss",
+        postcssPlugin: "relax-css",
         Once(root) {
             console.log("RelaxCSS plugin started.");
             console.log("Initial root nodes count:", root.nodes.length);
-            const classesToGenerateUtilitiesFor = new Set();
+            // This map will store the generated declarations for *base* utility classes
+            // E.g., 'px-4' -> [padding-left: 1rem, padding-right: 1rem]
+            const generatedUtilityDeclarations = new Map();
+            // Step 1: Pre-generate ALL possible base utility classes and store their declarations
+            // This is crucial for @apply to find definitions.
+            const allPossibleUtilityClasses = new Set();
+            // Generate classes from theme values
+            Object.keys(mergedConfig.theme).forEach((themeSectionKey) => {
+                const themeSection = mergedConfig.theme[themeSectionKey];
+                if (typeof themeSection === "object" && themeSection !== null) {
+                    Object.keys(themeSection).forEach((key) => {
+                        // General Spacing for p/m, w/h, min-w/h, max-w/h, etc.
+                        if (themeSectionKey === "spacing") {
+                            // p-*, m-*, px-*, py-*, etc.
+                            allPossibleUtilityClasses.add(`p-${key}`);
+                            allPossibleUtilityClasses.add(`m-${key}`);
+                            allPossibleUtilityClasses.add(`px-${key}`);
+                            allPossibleUtilityClasses.add(`py-${key}`);
+                            allPossibleUtilityClasses.add(`pt-${key}`);
+                            allPossibleUtilityClasses.add(`pr-${key}`);
+                            allPossibleUtilityClasses.add(`pb-${key}`);
+                            allPossibleUtilityClasses.add(`pl-${key}`);
+                            allPossibleUtilityClasses.add(`mx-${key}`);
+                            allPossibleUtilityClasses.add(`my-${key}`);
+                            allPossibleUtilityClasses.add(`mt-${key}`);
+                            allPossibleUtilityClasses.add(`mr-${key}`);
+                            allPossibleUtilityClasses.add(`mb-${key}`);
+                            allPossibleUtilityClasses.add(`ml-${key}`);
+                            allPossibleUtilityClasses.add(`w-${key}`);
+                            allPossibleUtilityClasses.add(`h-${key}`);
+                            allPossibleUtilityClasses.add(`min-w-${key}`);
+                            allPossibleUtilityClasses.add(`min-h-${key}`);
+                            allPossibleUtilityClasses.add(`top-${key}`);
+                            allPossibleUtilityClasses.add(`right-${key}`);
+                            allPossibleUtilityClasses.add(`bottom-${key}`);
+                            allPossibleUtilityClasses.add(`left-${key}`);
+                            allPossibleUtilityClasses.add(`inset-${key}`);
+                            allPossibleUtilityClasses.add(`inset-x-${key}`);
+                            allPossibleUtilityClasses.add(`inset-y-${key}`);
+                            // Add 'auto' for margin
+                            if (key === "auto") {
+                                allPossibleUtilityClasses.add(`m-auto`);
+                                allPossibleUtilityClasses.add(`mx-auto`);
+                                allPossibleUtilityClasses.add(`my-auto`);
+                            }
+                        }
+                        // Max-width/Height (uses its own scales)
+                        else if (themeSectionKey === "maxWidth") {
+                            allPossibleUtilityClasses.add(`max-w-${key}`);
+                        }
+                        else if (themeSectionKey === "maxHeight") {
+                            allPossibleUtilityClasses.add(`max-h-${key}`);
+                        }
+                        // Colors (bg-color, text-color, border-color, ring-offset-color)
+                        else if (themeSectionKey === "colors") {
+                            if (typeof themeSection[key] === "object" &&
+                                themeSection[key] !== null) {
+                                Object.keys(themeSection[key]).forEach((shade) => {
+                                    allPossibleUtilityClasses.add(`bg-${key}-${shade}`);
+                                    allPossibleUtilityClasses.add(`text-${key}-${shade}`);
+                                    allPossibleUtilityClasses.add(`border-${key}-${shade}`);
+                                    allPossibleUtilityClasses.add(`ring-offset-${key}-${shade}`);
+                                });
+                            }
+                            else {
+                                allPossibleUtilityClasses.add(`bg-${key}`);
+                                allPossibleUtilityClasses.add(`text-${key}`);
+                                allPossibleUtilityClasses.add(`border-${key}`);
+                            }
+                        }
+                        // Font sizes
+                        else if (themeSectionKey === "fontSize") {
+                            allPossibleUtilityClasses.add(`text-${key}`);
+                        }
+                        // Other single-property mappings
+                        else if (themeSectionKey === "fontWeight")
+                            allPossibleUtilityClasses.add(`font-${key}`);
+                        else if (themeSectionKey === "lineHeight")
+                            allPossibleUtilityClasses.add(`leading-${key}`);
+                        else if (themeSectionKey === "boxShadow")
+                            allPossibleUtilityClasses.add(`shadow-${key}`);
+                        else if (themeSectionKey === "zIndex")
+                            allPossibleUtilityClasses.add(`z-${key}`);
+                        else if (themeSectionKey === "opacity")
+                            allPossibleUtilityClasses.add(`opacity-${key}`);
+                        else if (themeSectionKey === "borderRadius")
+                            allPossibleUtilityClasses.add(`rounded-${key}`);
+                        else if (themeSectionKey === "borderWidth")
+                            allPossibleUtilityClasses.add(`border-${key}`);
+                        // Default border-width is handled in generateUtilityCss
+                        else if (themeSectionKey === "gridTemplateColumns")
+                            allPossibleUtilityClasses.add(`grid-cols-${key}`);
+                        else if (themeSectionKey === "gridTemplateRows")
+                            allPossibleUtilityClasses.add(`grid-rows-${key}`);
+                        else if (themeSectionKey === "flex")
+                            allPossibleUtilityClasses.add(`flex-${key}`);
+                        else if (themeSectionKey === "transitionProperty")
+                            allPossibleUtilityClasses.add(`transition-${key}`);
+                        else if (themeSectionKey === "transitionDuration")
+                            allPossibleUtilityClasses.add(`duration-${key}`);
+                        else if (themeSectionKey === "transitionTimingFunction")
+                            allPossibleUtilityClasses.add(`ease-${key}`);
+                    });
+                }
+            });
+            // Add hardcoded utilities
+            allPossibleUtilityClasses.add("block");
+            allPossibleUtilityClasses.add("inline");
+            allPossibleUtilityClasses.add("inline-block");
+            allPossibleUtilityClasses.add("hidden");
+            allPossibleUtilityClasses.add("flex"); // display: flex
+            allPossibleUtilityClasses.add("grid"); // display: grid
+            allPossibleUtilityClasses.add("static");
+            allPossibleUtilityClasses.add("relative");
+            allPossibleUtilityClasses.add("absolute");
+            allPossibleUtilityClasses.add("fixed");
+            allPossibleUtilityClasses.add("sticky");
+            allPossibleUtilityClasses.add("border"); // default border
+            allPossibleUtilityClasses.add("sr-only");
+            allPossibleUtilityClasses.add("not-sr-only");
+            allPossibleUtilityClasses.add("justify-start");
+            allPossibleUtilityClasses.add("justify-end");
+            allPossibleUtilityClasses.add("justify-center");
+            allPossibleUtilityClasses.add("justify-between");
+            allPossibleUtilityClasses.add("justify-around");
+            allPossibleUtilityClasses.add("justify-evenly");
+            allPossibleUtilityClasses.add("items-start");
+            allPossibleUtilityClasses.add("items-end");
+            allPossibleUtilityClasses.add("items-center");
+            allPossibleUtilityClasses.add("items-baseline");
+            allPossibleUtilityClasses.add("items-stretch");
+            allPossibleUtilityClasses.add("flex-row");
+            allPossibleUtilityClasses.add("flex-col");
+            allPossibleUtilityClasses.add("flex-row-reverse");
+            allPossibleUtilityClasses.add("flex-col-reverse");
+            allPossibleUtilityClasses.add("flex-wrap");
+            allPossibleUtilityClasses.add("flex-wrap-reverse");
+            allPossibleUtilityClasses.add("flex-nowrap");
+            allPossibleUtilityClasses.add("overflow-auto");
+            allPossibleUtilityClasses.add("overflow-hidden");
+            allPossibleUtilityClasses.add("overflow-visible");
+            allPossibleUtilityClasses.add("overflow-scroll");
+            allPossibleUtilityClasses.add("overflow-clip");
+            allPossibleUtilityClasses.add("overflow-x-auto");
+            allPossibleUtilityClasses.add("overflow-x-hidden");
+            allPossibleUtilityClasses.add("overflow-x-visible");
+            allPossibleUtilityClasses.add("overflow-x-scroll");
+            allPossibleUtilityClasses.add("overflow-x-clip");
+            allPossibleUtilityClasses.add("overflow-y-auto");
+            allPossibleUtilityClasses.add("overflow-y-hidden");
+            allPossibleUtilityClasses.add("overflow-y-visible");
+            allPossibleUtilityClasses.add("overflow-y-scroll");
+            allPossibleUtilityClasses.add("overflow-y-clip");
+            // Add more as needed based on your `generateUtilityCss` switch cases
+            // Generate declarations for all base utilities and store them
+            allPossibleUtilityClasses.forEach((className) => {
+                const declarations = generateUtilityCss(className, mergedConfig);
+                if (declarations.length > 0) {
+                    generatedUtilityDeclarations.set(className, declarations);
+                }
+            });
             const atApplyQueue = [];
-            root.walkAtRules("relax", (atRule) => {
-                atRule.remove();
-            });
-            // Step 1: Populate classesToGenerateUtilitiesFor and queue @apply rules
+            const mediaQueries = new Map();
+            // Step 2: Traverse rules and @apply directives
             root.walkRules((rule) => {
-                rule.selectors.forEach((sel) => {
-                    // Updated regex for arbitrary values and variants in selectors
-                    const classMatches = sel.match(/\.([a-zA-Z0-9_-]+(?:\[.*?\])?(?::[a-zA-Z0-9_-]+)*)/g);
-                    if (classMatches) {
-                        classMatches.forEach((match) => {
-                            classesToGenerateUtilitiesFor.add(match.substring(1));
-                        });
+                rule.walkAtRules((atRule) => {
+                    if (atRule.name === "apply") {
+                        const appliedClasses = atRule.params.split(/\s+/).filter(Boolean);
+                        atApplyQueue.push({ rule: rule, classes: appliedClasses });
+                        atRule.remove(); // Remove @apply immediately
                     }
                 });
-                rule.walkAtRules("apply", (atRule) => {
-                    const params = atRule.params.trim().split(/\s+/);
-                    params.forEach((appliedCls) => {
-                        atApplyQueue.push({ parentRule: rule, appliedClass: appliedCls });
+            });
+            root.walkAtRules((atRule) => {
+                if (atRule.name === "relax") {
+                    atRule.remove(); // Remove the @relax directive
+                }
+            });
+            // Step 3: Process @apply directives
+            atApplyQueue.forEach(({ rule: parentRule, classes: appliedClasses }) => {
+                appliedClasses.forEach((cls) => {
+                    // Extract base class name for lookup in generatedUtilityDeclarations
+                    let baseClassToApply = cls;
+                    let mediaQueryVariant; // e.g., 'sm', 'md'
+                    let pseudoClassVariants = []; // e.g., 'hover', 'focus'
+                    const parts = cls.split(":");
+                    if (parts.length > 1) {
+                        // Check for responsive variant (must be first)
+                        if (mergedConfig.variants.responsive.includes(parts[0])) {
+                            mediaQueryVariant = parts[0];
+                            baseClassToApply = parts.slice(1).join(":");
+                        }
+                        // Check for pseudo-class variants (from the potentially remaining parts)
+                        const remainingParts = baseClassToApply.split(":");
+                        pseudoClassVariants = remainingParts.filter((part) => mergedConfig.variants.pseudoClasses.includes(part));
+                        baseClassToApply = remainingParts
+                            .filter((part) => !mergedConfig.variants.pseudoClasses.includes(part))
+                            .join(":");
+                    }
+                    // Now, baseClassToApply should be something like 'px-4', 'max-w-7xl', 'bg-blue-500'
+                    const declarationsToApply = generatedUtilityDeclarations.get(baseClassToApply);
+                    if (declarationsToApply && declarationsToApply.length > 0) {
+                        let targetRule = parentRule;
+                        let currentSelector = parentRule.selector;
+                        // Apply pseudo-classes to the selector if present
+                        if (pseudoClassVariants.length > 0) {
+                            // Create a new rule with the combined selector for pseudo-classes
+                            let combinedPseudoSelector = currentSelector;
+                            pseudoClassVariants.forEach((pseudo) => {
+                                if (pseudo === "group-hover") {
+                                    combinedPseudoSelector = `:merge(.group):hover ${combinedPseudoSelector}`;
+                                }
+                                else {
+                                    combinedPseudoSelector += `:${pseudo}`;
+                                }
+                            });
+                            // This is where it gets tricky for @apply - we cannot easily nest rules within existing rules with new selectors.
+                            // For simplicity, we will append declarations to the parent rule, and let the *generated* utility class
+                            // handle its own pseudo-selectors. If an @apply includes a pseudo-class, it means we expect
+                            // the *base* utility for that pseudo-class to exist, e.g. `.hover\:px-4`.
+                            // For @apply, we mostly care about applying the *declarations*. The variant logic in the utility generation step
+                            // already creates the correct selectors.
+                        }
+                        // Handle responsive variants by creating a new rule inside a media query
+                        if (mediaQueryVariant) {
+                            const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
+                            let mqAtRule = mediaQueries.get(mqParam);
+                            if (!mqAtRule) {
+                                mqAtRule = new (require("postcss").AtRule)({
+                                    name: "media",
+                                    params: mqParam,
+                                });
+                                mediaQueries.set(mqParam, mqAtRule);
+                                root.append(mqAtRule); // Append media query to root once
+                            }
+                            // Create a new rule inside the media query, with the parent's selector
+                            const newResponsiveRule = new postcss_1.Rule({
+                                selector: parentRule.selector,
+                            });
+                            declarationsToApply.forEach((d) => newResponsiveRule.append(d.clone()));
+                            mqAtRule.append(newResponsiveRule);
+                        }
+                        else {
+                            // No media query, append declarations directly to the parent rule
+                            declarationsToApply.forEach((d) => parentRule.append(d.clone()));
+                        }
+                    }
+                    else {
+                        console.warn(`RelaxCSS: Could not find utility for @apply '${cls}'. Base class sought: '${baseClassToApply}'.`);
+                    }
+                });
+            });
+            // Aggregate Transform and Filter properties
+            root.walkRules((rule) => {
+                let transformDeclarations = [];
+                let filterDeclarations = [];
+                let backdropFilterDeclarations = [];
+                rule.walkDecls((decl) => {
+                    if (decl.prop === "--relax-transform") {
+                        transformDeclarations.push(decl);
+                        decl.remove();
+                    }
+                    else if (decl.prop === "--relax-filter") {
+                        filterDeclarations.push(decl);
+                        decl.remove();
+                    }
+                    else if (decl.prop === "--relax-backdrop-filter") {
+                        backdropFilterDeclarations.push(decl);
+                        decl.remove();
+                    }
+                });
+                if (transformDeclarations.length > 0) {
+                    const transformComponents = [];
+                    transformDeclarations.forEach((decl) => {
+                        const className = decl.value;
+                        const parts = className.split("-");
+                        const prefix = parts[0];
+                        const suffix = parts.slice(1).join("-");
+                        if (prefix === "scale-x") {
+                            const value = get(mergedConfig.theme.opacity, suffix); // using opacity scale for 0-100 values
+                            if (value !== undefined)
+                                transformComponents.push(`scaleX(${value})`);
+                        }
+                        else if (prefix === "scale-y") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`scaleY(${value})`);
+                        }
+                        else if (prefix === "scale") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`scale(${value})`);
+                        }
+                        else if (prefix === "rotate") {
+                            const value = get(mergedConfig.theme.spacing, suffix); // assuming spacing has angle values like '45' for 45deg
+                            if (value !== undefined)
+                                transformComponents.push(`rotate(${value}deg)`);
+                        }
+                        else if (prefix === "translate-x") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`translateX(${value})`);
+                        }
+                        else if (prefix === "translate-y") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`translateY(${value})`);
+                        }
+                        else if (prefix === "skew-x") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`skewX(${value}deg)`);
+                        }
+                        else if (prefix === "skew-y") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`skewY(${value}deg)`);
+                        }
                     });
-                    atRule.remove();
-                });
-            });
-            // Step 2: Process queued @apply rules (inlining styles)
-            atApplyQueue.forEach(({ parentRule, appliedClass }) => {
-                var _a;
-                let currentClass = appliedClass;
-                let responsiveVariant = null;
-                let pseudoClassVariant = null;
-                let baseUtility = "";
-                // Extract responsive variant
-                if (userConfig.variants.responsive &&
-                    Array.isArray(userConfig.variants.responsive)) {
-                    responsiveVariant = getVariant(currentClass, userConfig.variants.responsive);
-                    if (responsiveVariant) {
-                        currentClass = currentClass.replace(`${responsiveVariant}:`, "");
+                    if (transformComponents.length > 0) {
+                        rule.append(new postcss_1.Declaration({
+                            prop: "transform",
+                            value: transformComponents.join(" "),
+                        }));
                     }
                 }
-                // Extract pseudo-class variant
-                if (userConfig.variants.pseudoClass &&
-                    Array.isArray(userConfig.variants.pseudoClass)) {
-                    pseudoClassVariant = getVariant(currentClass, userConfig.variants.pseudoClass);
-                    if (pseudoClassVariant) {
-                        currentClass = currentClass.replace(`${pseudoClassVariant}:`, "");
-                    }
-                }
-                baseUtility = currentClass; // The utility class without variants
-                const baseRuleDeclarations = generateRuleFor(baseUtility, userConfig);
-                if (!baseRuleDeclarations)
-                    return; // If no declarations are generated for the base utility, skip
-                let targetRule = parentRule;
-                let mediaQueryRule = null;
-                if (responsiveVariant) {
-                    if (!userConfig.theme.screens[responsiveVariant]) {
-                        console.warn(`RelaxCSS: Responsive variant '${responsiveVariant}' used in @apply for '${appliedClass}' but no screen size defined in config. Skipping.`);
-                        return;
-                    }
-                    const mqParams = `(min-width: ${userConfig.theme.screens[responsiveVariant]})`;
-                    // Find or create the media query rule at the root level
-                    mediaQueryRule = root.nodes.find((node) => node.type === "atrule" &&
-                        node.name === "media" &&
-                        node.params === mqParams);
-                    if (!mediaQueryRule) {
-                        mediaQueryRule = postcss_1.default.atRule({
-                            name: "media",
-                            params: mqParams,
-                        });
-                        root.append(mediaQueryRule);
-                    }
-                    // Ensure mediaQueryRule has a `nodes` array
-                    if (!mediaQueryRule.nodes) {
-                        mediaQueryRule.nodes = []; // Cast to any to add nodes if missing
-                    }
-                    let innerSelector = parentRule.selector;
-                    if (pseudoClassVariant) {
-                        innerSelector = `${parentRule.selector}:${pseudoClassVariant}`;
-                    }
-                    // Find or create the rule inside the media query
-                    let existingRuleInMq = (mediaQueryRule.nodes || []).find((node) => node.type === "rule" && node.selector === innerSelector);
-                    if (!existingRuleInMq) {
-                        existingRuleInMq = postcss_1.default.rule({ selector: innerSelector });
-                        mediaQueryRule.append(existingRuleInMq);
-                    }
-                    targetRule = existingRuleInMq; // Set targetRule to the one inside the media query
-                }
-                else if (pseudoClassVariant) {
-                    const variantSelector = `${parentRule.selector}:${pseudoClassVariant}`;
-                    // Find or create the pseudo-class rule at the same level as parentRule
-                    let existingVariantRule = (_a = parentRule.parent) === null || _a === void 0 ? void 0 : _a.nodes.find((node) => node.type === "rule" && node.selector === variantSelector);
-                    if (!existingVariantRule) {
-                        existingVariantRule = postcss_1.default.rule({ selector: variantSelector });
-                        // Insert the pseudo-class rule right after the original rule
-                        parentRule.after(existingVariantRule);
-                    }
-                    targetRule = existingVariantRule; // Set targetRule to the pseudo-class variant rule
-                }
-                // Append declarations to the determined target rule
-                baseRuleDeclarations.nodes.forEach((decl) => {
-                    if (decl.type === "decl") {
-                        targetRule.append(decl.clone()); // Append a clone to avoid moving the original node
-                    }
-                });
-            });
-            // Step 3: Generate standalone utility rules only for classes found directly in selectors
-            const utilities = [];
-            classesToGenerateUtilitiesFor.forEach((cls) => {
-                let currentClass = cls;
-                let responsiveVariant = null;
-                let pseudoClassVariant = null;
-                let baseUtility = "";
-                // Extract responsive variant
-                if (userConfig.variants.responsive &&
-                    Array.isArray(userConfig.variants.responsive)) {
-                    responsiveVariant = getVariant(currentClass, userConfig.variants.responsive);
-                    if (responsiveVariant) {
-                        currentClass = currentClass.replace(`${responsiveVariant}:`, "");
-                    }
-                }
-                // Extract pseudo-class variant
-                if (userConfig.variants.pseudoClass &&
-                    Array.isArray(userConfig.variants.pseudoClass)) {
-                    pseudoClassVariant = getVariant(currentClass, userConfig.variants.pseudoClass);
-                    if (pseudoClassVariant) {
-                        currentClass = currentClass.replace(`${pseudoClassVariant}:`, "");
-                    }
-                }
-                baseUtility = currentClass; // The utility class without variants
-                const baseRuleDeclarations = generateRuleFor(baseUtility, userConfig);
-                if (!baseRuleDeclarations)
-                    return;
-                // Construct the final selector for the utility
-                let newRuleSelector = `.${cls
-                    .replace(/([:[]])/g, "\\$1")
-                    .replace(/\]/g, "\\]")}`; // Escaped original class for selector, handling arbitrary values and variants
-                if (pseudoClassVariant) {
-                    newRuleSelector += `:${pseudoClassVariant}`; // Add pseudo-class directly to the selector
-                }
-                const finalUtilityRule = postcss_1.default.rule({ selector: newRuleSelector });
-                baseRuleDeclarations.nodes.forEach((node) => finalUtilityRule.append(node.clone()));
-                if (responsiveVariant) {
-                    if (!userConfig.theme.screens[responsiveVariant]) {
-                        console.warn(`RelaxCSS: Responsive variant '${responsiveVariant}' used in utility '${cls}' but no screen size defined in config. Skipping.`);
-                        return;
-                    }
-                    const mq = postcss_1.default.atRule({
-                        name: "media",
-                        params: `(min-width: ${userConfig.theme.screens[responsiveVariant]})`,
+                if (filterDeclarations.length > 0) {
+                    const filterComponents = [];
+                    filterDeclarations.forEach((decl) => {
+                        const className = decl.value;
+                        const parts = className.split("-");
+                        const prefix = parts[0];
+                        const suffix = parts.slice(1).join("-");
+                        if (prefix === "blur") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`blur(${value})`);
+                        }
+                        else if (prefix === "brightness") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`brightness(${value})`);
+                        }
+                        else if (prefix === "contrast") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`contrast(${value})`);
+                        }
+                        else if (prefix === "drop-shadow") {
+                            const value = get(mergedConfig.theme.boxShadow, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`drop-shadow(${value})`);
+                        }
+                        else if (prefix === "grayscale") {
+                            filterComponents.push(`grayscale(1)`);
+                        }
+                        else if (prefix === "hue-rotate") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`hue-rotate(${value}deg)`);
+                        }
+                        else if (prefix === "invert") {
+                            filterComponents.push(`invert(1)`);
+                        }
+                        else if (prefix === "saturate") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`saturate(${value})`);
+                        }
+                        else if (prefix === "sepia") {
+                            filterComponents.push(`sepia(1)`);
+                        }
                     });
-                    mq.append(finalUtilityRule);
-                    utilities.push(mq);
+                    if (filterComponents.length > 0) {
+                        rule.append(new postcss_1.Declaration({
+                            prop: "filter",
+                            value: filterComponents.join(" "),
+                        }));
+                    }
                 }
-                else {
-                    utilities.push(finalUtilityRule);
+                if (backdropFilterDeclarations.length > 0) {
+                    const backdropFilterComponents = [];
+                    backdropFilterDeclarations.forEach((decl) => {
+                        const className = decl.value;
+                        const parts = className.split("-");
+                        const prefix = parts[0];
+                        const suffix = parts.slice(1).join("-");
+                        if (prefix === "backdrop-blur") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                backdropFilterComponents.push(`blur(${value})`);
+                        }
+                        // Add other backdrop filters here
+                    });
+                    if (backdropFilterComponents.length > 0) {
+                        rule.append(new postcss_1.Declaration({
+                            prop: "backdrop-filter",
+                            value: backdropFilterComponents.join(" "),
+                        }));
+                    }
                 }
             });
-            // Sort utilities to ensure media queries are at the end and in order
-            utilities.sort((a, b) => {
-                const isAMedia = a.type === "atrule" && a.name === "media";
-                const isBMedia = b.type === "atrule" && b.name === "media";
-                if (isAMedia && !isBMedia)
-                    return 1; // Media queries come after regular rules
-                if (!isAMedia && isBMedia)
-                    return -1; // Regular rules come before media queries
-                if (isAMedia && isBMedia) {
-                    // Sort media queries by breakpoint value
-                    const getBreakpoint = (node) => {
-                        const match = node.params.match(/min-width:\s*(\d+)/);
-                        return match ? parseInt(match[1]) : 0;
-                    };
-                    return (getBreakpoint(a) -
-                        getBreakpoint(b));
-                }
-                // For non-media rules, maintain original order
-                return 0;
-            });
-            utilities.forEach((r) => root.append(r));
             console.log("RelaxCSS plugin finished processing.");
             console.log("Final root nodes count:", root.nodes.length);
         },
     };
-}
-relaxcss.postcss = true;
-// --- generateRuleFor function starts here (MODIFIED) ---
-function generateRuleFor(cls, cfg) {
-    const rule = postcss_1.default.rule({ selector: `.${cls}` }); // This selector is a placeholder/temp
-    // Helper to extract arbitrary value
-    const getArbitraryValue = (className, prefix) => {
-        // Escaping prefix for regex to handle special characters like '.' in 'max-w-screen-2xl'
-        const escapedPrefix = prefix.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-        const regex = new RegExp(`^${escapedPrefix}\\[(.*?)\\]$`);
-        const match = className.match(regex);
-        return match ? match[1] : null;
-    };
-    // Helper to get value from theme or arbitrary, with a fallback
-    const getValue = (className, prefix, themeLookup, prop // for logging/debugging
-    ) => {
-        const arbitrary = getArbitraryValue(className, prefix);
-        if (arbitrary !== null) {
-            return arbitrary;
-        }
-        const key = className.slice(prefix.length); // e.g., 'red-500' from 'bg-red-500'
-        const value = themeLookup[key];
-        if (value === undefined) {
-            // console.warn(`RelaxCSS: No value found for '${key}' in theme.${prop} for class '${className}'.`);
-            return null;
-        }
-        return value;
-    };
-    const utilityMap = {
-        // Colors
-        "bg-": { prop: "background-color", themeKey: "colors" },
-        // Merged text- and color-related properties
-        "text-": {
-            prop: "font-size", // Default prop, but complexHandler will handle color too
-            themeKey: "fontSizes",
-            complexHandler: (key, cfg) => {
-                const declarations = [];
-                const color = cfg.theme.colors[key];
-                if (color) {
-                    declarations.push(postcss_1.default.decl({ prop: "color", value: color }));
-                }
-                // Fallback to font-size if not a color
-                const fontSize = cfg.theme.fontSizes[key];
-                if (fontSize) {
-                    declarations.push(postcss_1.default.decl({ prop: "font-size", value: fontSize }));
-                }
-                return declarations;
-            },
-        },
-        // Merged border- and width-related properties
-        "border-": {
-            prop: "border-color", // Default prop for color based on theme
-            themeKey: "colors",
-            complexHandler: (key, cfg) => {
-                // Handles border-width also
-                const declarations = [];
-                // Try to get border-color first
-                const color = cfg.theme.colors[key];
-                if (color) {
-                    declarations.push(postcss_1.default.decl({ prop: "border-color", value: color }));
-                }
-                // Then try to get border-width (e.g., border-2, border-0)
-                const value = getArbitraryValue(`border-[${key}]`, "border-") ||
-                    cfg.theme.spacing[key];
-                if (value !== undefined) {
-                    declarations.push(postcss_1.default.decl({ prop: "border-width", value: value }));
-                }
-                else if (key === "") {
-                    // Handles plain 'border' class, default to 1px
-                    declarations.push(postcss_1.default.decl({ prop: "border-width", value: "1px" }));
-                }
-                return declarations;
-            },
-        },
-        "outline-": { prop: "outline-color", themeKey: "colors" },
-        // Spacing (Margin & Padding)
-        "p-": { prop: "padding", themeKey: "spacing" },
-        "m-": { prop: "margin", themeKey: "spacing" },
-        "pt-": { prop: "padding-top", themeKey: "spacing" },
-        "pb-": { prop: "padding-bottom", themeKey: "spacing" },
-        "pl-": { prop: "padding-left", themeKey: "spacing" },
-        "pr-": { prop: "padding-right", themeKey: "spacing" },
-        "px-": {
-            prop: ["padding-left", "padding-right"],
-            themeKey: "spacing",
-        },
-        "py-": {
-            prop: ["padding-top", "padding-bottom"],
-            themeKey: "spacing",
-        },
-        "mt-": { prop: "margin-top", themeKey: "spacing" },
-        "mb-": { prop: "margin-bottom", themeKey: "spacing" },
-        "ml-": { prop: "margin-left", themeKey: "spacing" },
-        "mr-": { prop: "margin-right", themeKey: "spacing" },
-        "mx-": {
-            prop: ["margin-left", "margin-right"],
-            themeKey: "spacing",
-        },
-        "my-": {
-            prop: ["margin-top", "margin-bottom"],
-            themeKey: "spacing",
-        },
-        "-m-": {
-            // Negative margins
-            prop: "margin",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-m-${key}`, "-m-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [postcss_1.default.decl({ prop: "margin", value: `-${value}` })]
-                    : [];
-            },
-        },
-        "-mt-": {
-            // Negative margins
-            prop: "margin-top",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-mt-${key}`, "-mt-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [postcss_1.default.decl({ prop: "margin-top", value: `-${value}` })]
-                    : [];
-            },
-        },
-        "-mb-": {
-            // Negative margins
-            prop: "margin-bottom",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-mb-${key}`, "-mb-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [postcss_1.default.decl({ prop: "margin-bottom", value: `-${value}` })]
-                    : [];
-            },
-        },
-        "-ml-": {
-            // Negative margins
-            prop: "margin-left",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-ml-${key}`, "-ml-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [postcss_1.default.decl({ prop: "margin-left", value: `-${value}` })]
-                    : [];
-            },
-        },
-        "-mr-": {
-            // Negative margins
-            prop: "margin-right",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-mr-${key}`, "-mr-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [postcss_1.default.decl({ prop: "margin-right", value: `-${value}` })]
-                    : [];
-            },
-        },
-        "-mx-": {
-            // Negative margins
-            prop: ["margin-left", "margin-right"],
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-mx-${key}`, "-mx-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [
-                        postcss_1.default.decl({ prop: "margin-left", value: `-${value}` }),
-                        postcss_1.default.decl({ prop: "margin-right", value: `-${value}` }),
-                    ]
-                    : [];
-            },
-        },
-        "-my-": {
-            // Negative margins
-            prop: ["margin-top", "margin-bottom"],
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getValue(`-my-${key}`, "-my-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [
-                        postcss_1.default.decl({ prop: "margin-top", value: `-${value}` }),
-                        postcss_1.default.decl({ prop: "margin-bottom", value: `-${value}` }),
-                    ]
-                    : [];
-            },
-        },
-        "inset-": {
-            prop: ["top", "right", "bottom", "left"],
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                if (key === "0")
-                    return [
-                        postcss_1.default.decl({ prop: "top", value: "0" }),
-                        postcss_1.default.decl({ prop: "right", value: "0" }),
-                        postcss_1.default.decl({ prop: "bottom", value: "0" }),
-                        postcss_1.default.decl({ prop: "left", value: "0" }),
-                    ];
-                const value = getValue(`inset-${key}`, "inset-", cfg.theme.spacing, "spacing");
-                return value
-                    ? [
-                        postcss_1.default.decl({ prop: "top", value }),
-                        postcss_1.default.decl({ prop: "right", value }),
-                        postcss_1.default.decl({ prop: "bottom", value }),
-                        postcss_1.default.decl({ prop: "left", value }),
-                    ]
-                    : [];
-            },
-        },
-        "top-": { prop: "top", themeKey: "spacing" },
-        "bottom-": { prop: "bottom", themeKey: "spacing" },
-        "left-": { prop: "left", themeKey: "spacing" },
-        "right-": { prop: "right", themeKey: "spacing" },
-        // Sizing
-        "w-": { prop: "width", themeKey: "spacing" }, // w-1/2, w-full, w-4 etc.
-        "h-": { prop: "height", themeKey: "spacing" }, // h-full, h-screen, h-8 etc.
-        "max-w-": { prop: "max-width", themeKey: "maxWidth" },
-        "min-w-": { prop: "min-width", themeKey: "minWidth" },
-        "max-h-": { prop: "max-height", themeKey: "maxHeight" },
-        "min-h-": { prop: "min-height", themeKey: "minHeight" },
-        // Typography
-        "font-": {
-            prop: "font-weight",
-            themeKey: "fontWeights", // Handles font-bold, font-light etc.
-            complexHandler: (key, cfg) => {
-                const declarations = [];
-                const fontWeight = cfg.theme.fontWeights[key];
-                if (fontWeight) {
-                    declarations.push(postcss_1.default.decl({ prop: "font-weight", value: fontWeight }));
-                }
-                // Handle font-style (italic, not-italic) or other font properties
-                if (key === "italic")
-                    declarations.push(postcss_1.default.decl({ prop: "font-style", value: "italic" }));
-                if (key === "not-italic")
-                    declarations.push(postcss_1.default.decl({ prop: "font-style", value: "normal" }));
-                return declarations;
-            },
-        },
-        "leading-": { prop: "line-height", themeKey: "lineHeights" },
-        "tracking-": {
-            // Letter spacing
-            prop: "letter-spacing",
-            valueMap: {
-                tight: "-0.025em",
-                normal: "0em",
-                wide: "0.025em",
-                // Add more as needed
-            },
-        },
-        "text-center": { prop: "text-align", valueMap: { center: "center" } },
-        "text-left": { prop: "text-align", valueMap: { left: "left" } },
-        "text-right": { prop: "text-align", valueMap: { right: "right" } },
-        "text-justify": { prop: "text-align", valueMap: { justify: "justify" } },
-        uppercase: { prop: "text-transform", valueMap: { uppercase: "uppercase" } },
-        lowercase: { prop: "text-transform", valueMap: { lowercase: "lowercase" } },
-        capitalize: {
-            prop: "text-transform",
-            valueMap: { capitalize: "capitalize" },
-        },
-        "normal-case": {
-            prop: "text-transform",
-            valueMap: { "normal-case": "none" },
-        },
-        underline: {
-            prop: "text-decoration",
-            valueMap: { underline: "underline" },
-        },
-        "no-underline": {
-            prop: "text-decoration",
-            valueMap: { "no-underline": "none" },
-        },
-        "line-through": {
-            prop: "text-decoration",
-            valueMap: { "line-through": "line-through" },
-        },
-        // Display
-        block: { prop: "display", valueMap: { block: "block" } },
-        inline: { prop: "display", valueMap: { inline: "inline" } },
-        "inline-block": {
-            prop: "display",
-            valueMap: { "inline-block": "inline-block" },
-        },
-        hidden: { prop: "display", valueMap: { hidden: "none" } },
-        contents: { prop: "display", valueMap: { contents: "contents" } },
-        "list-item": { prop: "display", valueMap: { "list-item": "list-item" } },
-        // Flexbox
-        flex: { prop: "display", valueMap: { flex: "flex" } },
-        "inline-flex": {
-            prop: "display",
-            valueMap: { "inline-flex": "inline-flex" },
-        },
-        "flex-row": { prop: "flex-direction", valueMap: { row: "row" } },
-        "flex-col": { prop: "flex-direction", valueMap: { col: "column" } },
-        "flex-row-reverse": {
-            prop: "flex-direction",
-            valueMap: { "row-reverse": "row-reverse" },
-        },
-        "flex-col-reverse": {
-            prop: "flex-direction",
-            valueMap: { "col-reverse": "column-reverse" },
-        },
-        "flex-wrap": { prop: "flex-wrap", valueMap: { wrap: "wrap" } },
-        "flex-wrap-reverse": {
-            prop: "flex-wrap",
-            valueMap: { "wrap-reverse": "wrap-reverse" },
-        },
-        "flex-nowrap": { prop: "flex-wrap", valueMap: { nowrap: "nowrap" } },
-        "flex-1": { prop: "flex", valueMap: { "1": "1 1 0%" } },
-        "flex-auto": { prop: "flex", valueMap: { auto: "1 1 auto" } },
-        "flex-initial": { prop: "flex", valueMap: { initial: "0 1 auto" } },
-        "flex-none": { prop: "flex", valueMap: { none: "none" } },
-        "items-start": { prop: "align-items", valueMap: { start: "flex-start" } },
-        "items-end": { prop: "align-items", valueMap: { end: "flex-end" } },
-        "items-center": { prop: "align-items", valueMap: { center: "center" } },
-        "items-baseline": {
-            prop: "align-items",
-            valueMap: { baseline: "baseline" },
-        },
-        "items-stretch": { prop: "align-items", valueMap: { stretch: "stretch" } },
-        "justify-start": {
-            prop: "justify-content",
-            valueMap: { start: "flex-start" },
-        },
-        "justify-end": { prop: "justify-content", valueMap: { end: "flex-end" } },
-        "justify-center": {
-            prop: "justify-content",
-            valueMap: { center: "center" },
-        },
-        "justify-between": {
-            prop: "justify-content",
-            valueMap: { between: "space-between" },
-        },
-        "justify-around": {
-            prop: "justify-content",
-            valueMap: { around: "space-around" },
-        },
-        "justify-evenly": {
-            prop: "justify-content",
-            valueMap: { evenly: "space-evenly" },
-        },
-        "self-auto": { prop: "align-self", valueMap: { auto: "auto" } },
-        "self-start": { prop: "align-self", valueMap: { start: "flex-start" } },
-        "self-end": { prop: "align-self", valueMap: { end: "flex-end" } },
-        "self-center": { prop: "align-self", valueMap: { center: "center" } },
-        "self-stretch": { prop: "align-self", valueMap: { stretch: "stretch" } },
-        // Gap (for Flex and Grid)
-        "gap-": { prop: "gap", themeKey: "spacing" },
-        "gap-x-": { prop: "column-gap", themeKey: "spacing" },
-        "gap-y-": { prop: "row-gap", themeKey: "spacing" },
-        // Grid (basic)
-        grid: { prop: "display", valueMap: { grid: "grid" } },
-        "grid-cols-": {
-            prop: "grid-template-columns",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                if (key === "none")
-                    return [
-                        postcss_1.default.decl({ prop: "grid-template-columns", value: "none" }),
-                    ];
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [
-                        postcss_1.default.decl({
-                            prop: "grid-template-columns",
-                            value: `repeat(${num}, minmax(0, 1fr))`,
-                        }),
-                    ];
-                }
-                return [];
-            },
-        },
-        "col-span-": {
-            prop: "grid-column",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [
-                        postcss_1.default.decl({
-                            prop: "grid-column",
-                            value: `span ${num} / span ${num}`,
-                        }),
-                    ];
-                }
-                if (key === "full")
-                    return [postcss_1.default.decl({ prop: "grid-column", value: "1 / -1" })];
-                return [];
-            },
-        },
-        "col-start-": {
-            prop: "grid-column-start",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                if (key === "auto")
-                    return [postcss_1.default.decl({ prop: "grid-column-start", value: "auto" })];
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [postcss_1.default.decl({ prop: "grid-column-start", value: key })];
-                }
-                return [];
-            },
-        },
-        "col-end-": {
-            prop: "grid-column-end",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                if (key === "auto")
-                    return [postcss_1.default.decl({ prop: "grid-column-end", value: "auto" })];
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [postcss_1.default.decl({ prop: "grid-column-end", value: key })];
-                }
-                return [];
-            },
-        },
-        "grid-rows-": {
-            prop: "grid-template-rows",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                if (key === "none")
-                    return [postcss_1.default.decl({ prop: "grid-template-rows", value: "none" })];
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [
-                        postcss_1.default.decl({
-                            prop: "grid-template-rows",
-                            value: `repeat(${num}, minmax(0, 1fr))`,
-                        }),
-                    ];
-                }
-                return [];
-            },
-        },
-        "row-span-": {
-            prop: "grid-row",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [
-                        postcss_1.default.decl({
-                            prop: "grid-row",
-                            value: `span ${num} / span ${num}`,
-                        }),
-                    ];
-                }
-                if (key === "full")
-                    return [postcss_1.default.decl({ prop: "grid-row", value: "1 / -1" })];
-                return [];
-            },
-        },
-        "row-start-": {
-            prop: "grid-row-start",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                if (key === "auto")
-                    return [postcss_1.default.decl({ prop: "grid-row-start", value: "auto" })];
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [postcss_1.default.decl({ prop: "grid-row-start", value: key })];
-                }
-                return [];
-            },
-        },
-        "row-end-": {
-            prop: "grid-row-end",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                if (key === "auto")
-                    return [postcss_1.default.decl({ prop: "grid-row-end", value: "auto" })];
-                const num = parseInt(key);
-                if (!isNaN(num) && num > 0) {
-                    return [postcss_1.default.decl({ prop: "grid-row-end", value: key })];
-                }
-                return [];
-            },
-        },
-        "auto-cols-": {
-            prop: "grid-auto-columns",
-            valueMap: {
-                auto: "auto",
-                min: "min-content",
-                max: "max-content",
-                fr: "minmax(0, 1fr)",
-            },
-        },
-        "auto-rows-": {
-            prop: "grid-auto-rows",
-            valueMap: {
-                auto: "auto",
-                min: "min-content",
-                max: "max-content",
-                fr: "minmax(0, 1fr)",
-            },
-        },
-        // Borders & Outline
-        "rounded-": { prop: "border-radius", themeKey: "borderRadius" },
-        "rounded-t-": {
-            prop: ["border-top-left-radius", "border-top-right-radius"],
-            themeKey: "borderRadius",
-        },
-        "rounded-b-": {
-            prop: ["border-bottom-left-radius", "border-bottom-right-radius"],
-            themeKey: "borderRadius",
-        },
-        "rounded-l-": {
-            prop: ["border-top-left-radius", "border-bottom-left-radius"],
-            themeKey: "borderRadius",
-        },
-        "rounded-r-": {
-            prop: ["border-top-right-radius", "border-bottom-right-radius"],
-            themeKey: "borderRadius",
-        },
-        "rounded-tl-": { prop: "border-top-left-radius", themeKey: "borderRadius" },
-        "rounded-tr-": {
-            prop: "border-top-right-radius",
-            themeKey: "borderRadius",
-        },
-        "rounded-bl-": {
-            prop: "border-bottom-left-radius",
-            themeKey: "borderRadius",
-        },
-        "rounded-br-": {
-            prop: "border-bottom-right-radius",
-            themeKey: "borderRadius",
-        },
-        "border-solid": { prop: "border-style", valueMap: { solid: "solid" } },
-        "border-dashed": { prop: "border-style", valueMap: { dashed: "dashed" } },
-        "border-dotted": { prop: "border-style", valueMap: { dotted: "dotted" } },
-        "border-none": { prop: "border-style", valueMap: { none: "none" } },
-        "border-t-": {
-            prop: "border-top-width",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getArbitraryValue(`border-t-[${key}]`, "border-t-") ||
-                    cfg.theme.spacing[key] ||
-                    "1px"; // Default to 1px if no theme value for general border
-                return [postcss_1.default.decl({ prop: "border-top-width", value: value })];
-            },
-        },
-        "border-b-": {
-            prop: "border-bottom-width",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getArbitraryValue(`border-b-[${key}]`, "border-b-") ||
-                    cfg.theme.spacing[key] ||
-                    "1px";
-                return [postcss_1.default.decl({ prop: "border-bottom-width", value: value })];
-            },
-        },
-        "border-l-": {
-            prop: "border-left-width",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getArbitraryValue(`border-l-[${key}]`, "border-l-") ||
-                    cfg.theme.spacing[key] ||
-                    "1px";
-                return [postcss_1.default.decl({ prop: "border-left-width", value: value })];
-            },
-        },
-        "border-r-": {
-            prop: "border-right-width",
-            themeKey: "spacing",
-            complexHandler: (key, cfg) => {
-                const value = getArbitraryValue(`border-r-[${key}]`, "border-r-") ||
-                    cfg.theme.spacing[key] ||
-                    "1px";
-                return [postcss_1.default.decl({ prop: "border-right-width", value: value })];
-            },
-        },
-        // Box Shadow
-        "shadow-": { prop: "box-shadow", themeKey: "boxShadow" },
-        shadow: {
-            prop: "box-shadow",
-            complexHandler: (key, cfg) => {
-                // For 'shadow' itself (e.g. `class="shadow"`)
-                // The key will be an empty string or 'default' if it's explicitly 'shadow-default'
-                const shadowValue = cfg.theme.boxShadow[key] || cfg.theme.boxShadow.DEFAULT;
-                return shadowValue
-                    ? [postcss_1.default.decl({ prop: "box-shadow", value: shadowValue })]
-                    : [];
-            },
-        },
-        // Position
-        static: { prop: "position", valueMap: { static: "static" } },
-        fixed: { prop: "position", valueMap: { fixed: "fixed" } },
-        absolute: { prop: "position", valueMap: { absolute: "absolute" } },
-        relative: { prop: "position", valueMap: { relative: "relative" } },
-        sticky: { prop: "position", valueMap: { sticky: "sticky" } },
-        // Z-Index
-        "z-": { prop: "z-index", themeKey: "zIndex" },
-        // Overflow
-        "overflow-auto": { prop: "overflow", valueMap: { auto: "auto" } },
-        "overflow-hidden": { prop: "overflow", valueMap: { hidden: "hidden" } },
-        "overflow-clip": { prop: "overflow", valueMap: { clip: "clip" } },
-        "overflow-visible": { prop: "overflow", valueMap: { visible: "visible" } },
-        "overflow-scroll": { prop: "overflow", valueMap: { scroll: "scroll" } },
-        "overflow-x-auto": { prop: "overflow-x", valueMap: { auto: "auto" } },
-        "overflow-y-auto": { prop: "overflow-y", valueMap: { auto: "auto" } },
-        "overflow-x-hidden": { prop: "overflow-x", valueMap: { hidden: "hidden" } },
-        "overflow-y-hidden": { prop: "overflow-y", valueMap: { hidden: "hidden" } },
-        // Cursor
-        "cursor-auto": { prop: "cursor", valueMap: { auto: "auto" } },
-        "cursor-default": { prop: "cursor", valueMap: { default: "default" } },
-        "cursor-pointer": { prop: "cursor", valueMap: { pointer: "pointer" } },
-        "cursor-wait": { prop: "cursor", valueMap: { wait: "wait" } },
-        "cursor-text": { prop: "cursor", valueMap: { text: "text" } },
-        "cursor-move": { prop: "cursor", valueMap: { move: "move" } },
-        "cursor-help": { prop: "cursor", valueMap: { help: "help" } },
-        "cursor-not-allowed": {
-            prop: "cursor",
-            valueMap: { "not-allowed": "not-allowed" },
-        },
-        "cursor-grab": { prop: "cursor", valueMap: { grab: "grab" } },
-        "cursor-grabbing": { prop: "cursor", valueMap: { grabbing: "grabbing" } },
-        // Pointer Events
-        "pointer-events-none": {
-            prop: "pointer-events",
-            valueMap: { none: "none" },
-        },
-        "pointer-events-auto": {
-            prop: "pointer-events",
-            valueMap: { auto: "auto" },
-        },
-        // Visibility
-        visible: { prop: "visibility", valueMap: { visible: "visible" } },
-        invisible: { prop: "visibility", valueMap: { invisible: "hidden" } },
-        // Opacity
-        "opacity-": {
-            prop: "opacity",
-            complexHandler: (key, cfg) => {
-                // Added cfg argument
-                const declarations = [];
-                const num = parseFloat(key);
-                if (!isNaN(num) && num >= 0 && num <= 100) {
-                    // e.g., opacity-50
-                    declarations.push(postcss_1.default.decl({ prop: "opacity", value: (num / 100).toString() }));
-                }
-                // Arbitrary values like opacity-[0.25]
-                const arbitrary = getArbitraryValue(`opacity-[${key}]`, "opacity-");
-                if (arbitrary) {
-                    declarations.push(postcss_1.default.decl({ prop: "opacity", value: arbitrary }));
-                }
-                return declarations;
-            },
-        },
-        // White Space
-        "whitespace-normal": {
-            prop: "white-space",
-            valueMap: { normal: "normal" },
-        },
-        "whitespace-nowrap": {
-            prop: "white-space",
-            valueMap: { nowrap: "nowrap" },
-        },
-        "whitespace-pre": { prop: "white-space", valueMap: { pre: "pre" } },
-        "whitespace-pre-line": {
-            prop: "white-space",
-            valueMap: { "pre-line": "pre-line" },
-        },
-        "whitespace-pre-wrap": {
-            prop: "white-space",
-            valueMap: { "pre-wrap": "pre-wrap" },
-        },
-        truncate: {
-            prop: ["overflow", "text-overflow", "white-space"],
-            valueMap: {
-                truncate: ["hidden", "ellipsis", "nowrap"],
-            },
-        },
-        // Object Fit
-        "object-contain": { prop: "object-fit", valueMap: { contain: "contain" } },
-        "object-cover": { prop: "object-fit", valueMap: { cover: "cover" } },
-        "object-fill": { prop: "object-fit", valueMap: { fill: "fill" } },
-        "object-none": { prop: "object-fit", valueMap: { none: "none" } },
-        "object-scale-down": {
-            prop: "object-fit",
-            valueMap: { "scale-down": "scale-down" },
-        },
-        // Object Position
-        "object-bottom": {
-            prop: "object-position",
-            valueMap: { bottom: "bottom" },
-        },
-        "object-center": {
-            prop: "object-position",
-            valueMap: { center: "center" },
-        },
-        "object-left": { prop: "object-position", valueMap: { left: "left" } },
-        "object-left-bottom": {
-            prop: "object-position",
-            valueMap: { "left-bottom": "left bottom" },
-        },
-        "object-left-top": {
-            prop: "object-position",
-            valueMap: { "left-top": "left top" },
-        },
-        "object-right": { prop: "object-position", valueMap: { right: "right" } },
-        "object-right-bottom": {
-            prop: "object-position",
-            valueMap: { "right-bottom": "right bottom" },
-        },
-        "object-right-top": {
-            prop: "object-position",
-            valueMap: { "right-top": "right top" },
-        },
-        "object-top": { prop: "object-position", valueMap: { top: "top" } },
-    };
-    // Iterate through utilityMap to find a match
-    for (const prefix in utilityMap) {
-        if (cls.startsWith(prefix)) {
-            const handler = utilityMap[prefix];
-            const declarations = [];
-            const key = cls.slice(prefix.length); // e.g., '500' from 'bg-500' or 'red-500' from 'bg-red-500'
-            // Arbitrary value check first
-            const arbitraryValue = getArbitraryValue(cls, prefix);
-            if (arbitraryValue !== null) {
-                const props = Array.isArray(handler.prop)
-                    ? handler.prop
-                    : [handler.prop];
-                props.forEach((p) => declarations.push(postcss_1.default.decl({ prop: p, value: arbitraryValue })));
-            }
-            else if (handler.complexHandler) {
-                declarations.push(...handler.complexHandler(key, cfg)); // Ensure cfg is passed here
-            }
-            else if (handler.valueMap && handler.valueMap[key] !== undefined) {
-                // Check for undefined
-                const value = handler.valueMap[key];
-                const props = Array.isArray(handler.prop)
-                    ? handler.prop
-                    : [handler.prop];
-                if (Array.isArray(value)) {
-                    // For truncate and similar multi-property handlers
-                    if (props.length === value.length) {
-                        value.forEach((val, index) => {
-                            declarations.push(postcss_1.default.decl({ prop: props[index], value: val }));
-                        });
-                    }
-                    else {
-                        console.warn(`RelaxCSS: Mismatch in prop and value array length for '${cls}'.`);
-                    }
-                }
-                else {
-                    props.forEach((p) => declarations.push(postcss_1.default.decl({ prop: p, value: value }))); // Type assertion
-                }
-            }
-            else if (handler.themeKey) {
-                const themeCategory = cfg.theme[handler.themeKey];
-                if (themeCategory && typeof themeCategory === "object") {
-                    // Ensure themeCategory exists and is an object
-                    const themeValue = themeCategory[key];
-                    if (themeValue !== undefined) {
-                        const props = Array.isArray(handler.prop)
-                            ? handler.prop
-                            : [handler.prop];
-                        props.forEach((p) => declarations.push(postcss_1.default.decl({ prop: p, value: themeValue })));
-                    }
-                }
-            }
-            declarations.forEach((decl) => rule.append(decl));
-            return rule.nodes.length ? rule : null;
-        }
-    }
-    // Handle specific exact matches that don't fit a prefix pattern or are complex
-    switch (cls) {
-        case "container":
-            // This is a more complex utility that often involves max-width and margin: auto
-            // For now, let's keep it simple or implement it later.
-            // Example:
-            // rule.append(postcss.decl({ prop: "width", value: "100%" }));
-            // rule.append(postcss.decl({ prop: "margin-right", value: "auto" }));
-            // rule.append(postcss.decl({ prop: "margin-left", value: "auto" }));
-            // return rule; // Return early if handled
-            break;
-        case "antialiased":
-            rule.append(postcss_1.default.decl({ prop: "-webkit-font-smoothing", value: "antialiased" }));
-            rule.append(postcss_1.default.decl({ prop: "-moz-osx-font-smoothing", value: "grayscale" }));
-            return rule;
-        case "subpixel-antialiased":
-            rule.append(postcss_1.default.decl({ prop: "-webkit-font-smoothing", value: "auto" }));
-            rule.append(postcss_1.default.decl({ prop: "-moz-osx-font-smoothing", value: "auto" }));
-            return rule;
-        case "table":
-            rule.append(postcss_1.default.decl({ prop: "display", value: "table" }));
-            return rule;
-        case "table-row":
-            rule.append(postcss_1.default.decl({ prop: "display", value: "table-row" }));
-            return rule;
-        case "table-cell":
-            rule.append(postcss_1.default.decl({ prop: "display", value: "table-cell" }));
-            return rule;
-        // Add other exact matches here
-    }
-    return rule.nodes.length ? rule : null;
-}
-module.exports = relaxcss;
-exports.default = relaxcss;
+};
+plugin.postcss = true;
+module.exports = plugin;

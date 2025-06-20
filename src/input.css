@@ -1,15 +1,12 @@
-@import "base.css";
 /* src/input.css */
-@relax;
-/* Import your base styles (the CSS reset) */
+@import "base.css";
 
-/* Example custom CSS or component styles */
-.my-custom-component {
-  background-color: lightgray;
-  padding: 1rem;
+@relax;
+
+.container {
+  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 hover:bg-gray-100;
 }
 
-/* You can also use your RelaxCSS @apply here */
-.my-button {
-  @apply bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600;
+.box {
+  @apply bg-[#222] shadow-md rounded-lg p-6 flex flex-col items-center sm:hover:bg-gray-800;
 }
