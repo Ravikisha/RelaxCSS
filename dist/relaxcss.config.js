@@ -1,5 +1,16 @@
 // relaxcss.config.js
+const postcss = require('postcss');
 module.exports = {
+  plugins: [
+    function ({ addUtilities, config }) {
+      addUtilities({
+        "fancy-border": () => [
+          // You can use the config if needed
+          new config.postcss.Declaration({ prop: "border", value: "2px dashed magenta" })
+        ],
+      });
+    },
+  ],
   fileExtensions: ["css", "html", "js", "jsx", "ts", "tsx", "vue", "svelte"],
   theme: {
     colors: {

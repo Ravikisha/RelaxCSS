@@ -3,8 +3,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 const postcss_1 = require("postcss");
+const postcss_2 = __importDefault(require("postcss"));
 const lodash_merge_1 = __importDefault(require("lodash.merge"));
 const defaultConfig = {
+    plugins: [
+        function ({ addUtilities, config }) {
+            addUtilities({
+                "fancy-border": () => [
+                    // You can use the config if needed
+                    new postcss_1.Declaration({ prop: "border", value: "2px dashed magenta" })
+                ],
+            });
+        },
+    ],
     theme: {
         screens: {
             sm: "640px",
@@ -1013,462 +1024,6 @@ function generateUtilityCss(className, config) {
     }
     return declarations;
 }
-// --- 3. PostCSS Plugin Core ---
-const plugin = (opts) => {
-    const mergedConfig = (0, lodash_merge_1.default)(defaultConfig, opts);
-    return {
-        postcssPlugin: "relax-css",
-        Once(root) {
-            console.log("RelaxCSS plugin started.");
-            // Remove all @import at-rules from the root
-            root.walkAtRules("import", (atRule) => {
-                atRule.remove();
-            });
-            // This map will store the generated declarations for *base* utility classes
-            // E.g., 'px-4' -> [padding-left: 1rem, padding-right: 1rem]
-            const generatedUtilityDeclarations = new Map();
-            // Step 1: Pre-generate ALL possible base utility classes and store their declarations
-            // This is crucial for @apply to find definitions.
-            const allPossibleUtilityClasses = new Set();
-            // Generate classes from theme values
-            Object.keys(mergedConfig.theme).forEach((themeSectionKey) => {
-                const themeSection = mergedConfig.theme[themeSectionKey];
-                if (typeof themeSection === "object" && themeSection !== null) {
-                    Object.keys(themeSection).forEach((key) => {
-                        // General Spacing for p/m, w/h, min-w/h, max-w/h, etc.
-                        if (themeSectionKey === "spacing") {
-                            // p-*, m-*, px-*, py-*, etc.
-                            allPossibleUtilityClasses.add(`p-${key}`);
-                            allPossibleUtilityClasses.add(`m-${key}`);
-                            allPossibleUtilityClasses.add(`px-${key}`);
-                            allPossibleUtilityClasses.add(`py-${key}`);
-                            allPossibleUtilityClasses.add(`pt-${key}`);
-                            allPossibleUtilityClasses.add(`pr-${key}`);
-                            allPossibleUtilityClasses.add(`pb-${key}`);
-                            allPossibleUtilityClasses.add(`pl-${key}`);
-                            allPossibleUtilityClasses.add(`mx-${key}`);
-                            allPossibleUtilityClasses.add(`my-${key}`);
-                            allPossibleUtilityClasses.add(`mt-${key}`);
-                            allPossibleUtilityClasses.add(`mr-${key}`);
-                            allPossibleUtilityClasses.add(`mb-${key}`);
-                            allPossibleUtilityClasses.add(`ml-${key}`);
-                            allPossibleUtilityClasses.add(`w-${key}`);
-                            allPossibleUtilityClasses.add(`h-${key}`);
-                            allPossibleUtilityClasses.add(`min-w-${key}`);
-                            allPossibleUtilityClasses.add(`min-h-${key}`);
-                            allPossibleUtilityClasses.add(`top-${key}`);
-                            allPossibleUtilityClasses.add(`right-${key}`);
-                            allPossibleUtilityClasses.add(`bottom-${key}`);
-                            allPossibleUtilityClasses.add(`left-${key}`);
-                            allPossibleUtilityClasses.add(`inset-${key}`);
-                            allPossibleUtilityClasses.add(`inset-x-${key}`);
-                            allPossibleUtilityClasses.add(`inset-y-${key}`);
-                            // Add 'auto' for margin
-                            if (key === "auto") {
-                                allPossibleUtilityClasses.add(`m-auto`);
-                                allPossibleUtilityClasses.add(`mx-auto`);
-                                allPossibleUtilityClasses.add(`my-auto`);
-                            }
-                        }
-                        // Max-width/Height (uses its own scales)
-                        else if (themeSectionKey === "maxWidth") {
-                            allPossibleUtilityClasses.add(`max-w-${key}`);
-                        }
-                        else if (themeSectionKey === "maxHeight") {
-                            allPossibleUtilityClasses.add(`max-h-${key}`);
-                        }
-                        // Colors (bg-color, text-color, border-color, ring-offset-color)
-                        else if (themeSectionKey === "colors") {
-                            if (typeof themeSection[key] === "object" &&
-                                themeSection[key] !== null) {
-                                Object.keys(themeSection[key]).forEach((shade) => {
-                                    allPossibleUtilityClasses.add(`bg-${key}-${shade}`);
-                                    allPossibleUtilityClasses.add(`text-${key}-${shade}`);
-                                    allPossibleUtilityClasses.add(`border-${key}-${shade}`);
-                                    allPossibleUtilityClasses.add(`ring-offset-${key}-${shade}`);
-                                });
-                            }
-                            else {
-                                allPossibleUtilityClasses.add(`bg-${key}`);
-                                allPossibleUtilityClasses.add(`text-${key}`);
-                                allPossibleUtilityClasses.add(`border-${key}`);
-                            }
-                        }
-                        // Font sizes
-                        else if (themeSectionKey === "fontSize") {
-                            allPossibleUtilityClasses.add(`text-${key}`);
-                        }
-                        // Other single-property mappings
-                        else if (themeSectionKey === "fontWeight")
-                            allPossibleUtilityClasses.add(`font-${key}`);
-                        else if (themeSectionKey === "lineHeight")
-                            allPossibleUtilityClasses.add(`leading-${key}`);
-                        else if (themeSectionKey === "boxShadow")
-                            allPossibleUtilityClasses.add(`shadow-${key}`);
-                        else if (themeSectionKey === "zIndex")
-                            allPossibleUtilityClasses.add(`z-${key}`);
-                        else if (themeSectionKey === "opacity")
-                            allPossibleUtilityClasses.add(`opacity-${key}`);
-                        else if (themeSectionKey === "borderRadius")
-                            allPossibleUtilityClasses.add(`rounded-${key}`);
-                        else if (themeSectionKey === "borderWidth")
-                            allPossibleUtilityClasses.add(`border-${key}`);
-                        // Default border-width is handled in generateUtilityCss
-                        else if (themeSectionKey === "gridTemplateColumns")
-                            allPossibleUtilityClasses.add(`grid-cols-${key}`);
-                        else if (themeSectionKey === "gridTemplateRows")
-                            allPossibleUtilityClasses.add(`grid-rows-${key}`);
-                        else if (themeSectionKey === "flex")
-                            allPossibleUtilityClasses.add(`flex-${key}`);
-                        else if (themeSectionKey === "transitionProperty")
-                            allPossibleUtilityClasses.add(`transition-${key}`);
-                        else if (themeSectionKey === "transitionDuration")
-                            allPossibleUtilityClasses.add(`duration-${key}`);
-                        else if (themeSectionKey === "transitionTimingFunction")
-                            allPossibleUtilityClasses.add(`ease-${key}`);
-                    });
-                }
-            });
-            // Add hardcoded utilities
-            allPossibleUtilityClasses.add("block");
-            allPossibleUtilityClasses.add("inline");
-            allPossibleUtilityClasses.add("inline-block");
-            allPossibleUtilityClasses.add("hidden");
-            allPossibleUtilityClasses.add("flex"); // display: flex
-            allPossibleUtilityClasses.add("grid"); // display: grid
-            allPossibleUtilityClasses.add("static");
-            allPossibleUtilityClasses.add("relative");
-            allPossibleUtilityClasses.add("absolute");
-            allPossibleUtilityClasses.add("fixed");
-            allPossibleUtilityClasses.add("sticky");
-            allPossibleUtilityClasses.add("border"); // default border
-            allPossibleUtilityClasses.add("sr-only");
-            allPossibleUtilityClasses.add("not-sr-only");
-            allPossibleUtilityClasses.add("justify-start");
-            allPossibleUtilityClasses.add("justify-end");
-            allPossibleUtilityClasses.add("justify-center");
-            allPossibleUtilityClasses.add("justify-between");
-            allPossibleUtilityClasses.add("justify-around");
-            allPossibleUtilityClasses.add("justify-evenly");
-            allPossibleUtilityClasses.add("items-start");
-            allPossibleUtilityClasses.add("items-end");
-            allPossibleUtilityClasses.add("items-center");
-            allPossibleUtilityClasses.add("items-baseline");
-            allPossibleUtilityClasses.add("items-stretch");
-            allPossibleUtilityClasses.add("flex-row");
-            allPossibleUtilityClasses.add("flex-col");
-            allPossibleUtilityClasses.add("flex-row-reverse");
-            allPossibleUtilityClasses.add("flex-col-reverse");
-            allPossibleUtilityClasses.add("flex-wrap");
-            allPossibleUtilityClasses.add("flex-wrap-reverse");
-            allPossibleUtilityClasses.add("flex-nowrap");
-            allPossibleUtilityClasses.add("overflow-auto");
-            allPossibleUtilityClasses.add("overflow-hidden");
-            allPossibleUtilityClasses.add("overflow-visible");
-            allPossibleUtilityClasses.add("overflow-scroll");
-            allPossibleUtilityClasses.add("overflow-clip");
-            allPossibleUtilityClasses.add("overflow-x-auto");
-            allPossibleUtilityClasses.add("overflow-x-hidden");
-            allPossibleUtilityClasses.add("overflow-x-visible");
-            allPossibleUtilityClasses.add("overflow-x-scroll");
-            allPossibleUtilityClasses.add("overflow-x-clip");
-            allPossibleUtilityClasses.add("overflow-y-auto");
-            allPossibleUtilityClasses.add("overflow-y-hidden");
-            allPossibleUtilityClasses.add("overflow-y-visible");
-            allPossibleUtilityClasses.add("overflow-y-scroll");
-            allPossibleUtilityClasses.add("overflow-y-clip");
-            // Add more as needed based on your `generateUtilityCss` switch cases
-            // Generate declarations for all base utilities and store them
-            allPossibleUtilityClasses.forEach((className) => {
-                const declarations = generateUtilityCss(className, mergedConfig);
-                if (declarations.length > 0) {
-                    generatedUtilityDeclarations.set(className, declarations);
-                }
-            });
-            const atApplyQueue = [];
-            const mediaQueries = new Map();
-            // Step 2: Traverse rules and @apply directives
-            root.walkRules((rule) => {
-                rule.walkAtRules((atRule) => {
-                    if (atRule.name === "apply") {
-                        const appliedClasses = atRule.params.split(/\s+/).filter(Boolean);
-                        atApplyQueue.push({ rule: rule, classes: appliedClasses });
-                        atRule.remove(); // Remove @apply immediately
-                    }
-                });
-            });
-            root.walkAtRules((atRule) => {
-                if (atRule.name === "relax") {
-                    // add comment to the root node
-                    root.prepend(new (require("postcss").Comment)({
-                        text: "RelaxCSS processed with @relax directive",
-                    }));
-                    atRule.remove(); // Remove the @relax directive
-                }
-            });
-            // Step 3: Process @apply directives
-            atApplyQueue.forEach(({ rule: parentRule, classes: appliedClasses }) => {
-                appliedClasses.forEach((cls) => {
-                    var _a, _b;
-                    // Extract base class name for lookup in generatedUtilityDeclarations
-                    let baseClassToApply = cls;
-                    let mediaQueryVariant; // e.g., 'sm', 'md'
-                    let pseudoClassVariants = []; // e.g., 'hover', 'focus'
-                    const parts = cls.split(":");
-                    if (parts.length > 1) {
-                        // Check for responsive variant (must be first)
-                        if (mergedConfig.variants.responsive.includes(parts[0])) {
-                            mediaQueryVariant = parts[0];
-                            baseClassToApply = parts.slice(1).join(":");
-                        }
-                        // Check for pseudo-class variants (from the potentially remaining parts)
-                        const remainingParts = baseClassToApply.split(":");
-                        pseudoClassVariants = remainingParts.filter((part) => mergedConfig.variants.pseudoClasses.includes(part));
-                        baseClassToApply = remainingParts
-                            .filter((part) => !mergedConfig.variants.pseudoClasses.includes(part))
-                            .join(":");
-                    }
-                    // Now, baseClassToApply should be something like 'px-4', 'max-w-7xl', 'bg-blue-500'
-                    const declarationsToApply = generatedUtilityDeclarations.get(baseClassToApply);
-                    if (declarationsToApply && declarationsToApply.length > 0) {
-                        let targetRule = parentRule;
-                        let currentSelector = parentRule.selector;
-                        // Apply pseudo-classes to the selector if present
-                        if (pseudoClassVariants.length > 0) {
-                            // Create a new rule with the combined selector for pseudo-classes
-                            let combinedPseudoSelector = currentSelector;
-                            pseudoClassVariants.forEach((pseudo) => {
-                                if (pseudo === "group-hover") {
-                                    combinedPseudoSelector = `:merge(.group):hover ${combinedPseudoSelector}`;
-                                }
-                                else {
-                                    combinedPseudoSelector += `:${pseudo}`;
-                                }
-                            });
-                            // --- Support stacking of responsive and pseudo variants ---
-                            // If we have a mediaQueryVariant, wrap the pseudo rule in the media query
-                            if (mediaQueryVariant) {
-                                const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
-                                let mqAtRule = mediaQueries.get(mqParam);
-                                if (!mqAtRule) {
-                                    mqAtRule = new (require("postcss").AtRule)({
-                                        name: "media",
-                                        params: mqParam,
-                                    });
-                                    mediaQueries.set(mqParam, mqAtRule);
-                                    root.append(mqAtRule);
-                                }
-                                // Create a new rule with the modified selector inside the media query
-                                targetRule = new postcss_1.Rule({
-                                    selector: combinedPseudoSelector,
-                                });
-                                declarationsToApply.forEach((d) => targetRule.append(d.clone()));
-                                mqAtRule.append(targetRule);
-                            }
-                            else {
-                                // No media query, just append the pseudo rule to the parent
-                                targetRule = new postcss_1.Rule({
-                                    selector: combinedPseudoSelector,
-                                });
-                                declarationsToApply.forEach((d) => targetRule.append(d.clone()));
-                                (_a = parentRule.parent) === null || _a === void 0 ? void 0 : _a.append(targetRule);
-                            }
-                            // If we have pseudo-classes, we don't need to apply them again
-                            return;
-                            // Create a new rule with the modified selector
-                            targetRule = new postcss_1.Rule({
-                                selector: combinedPseudoSelector,
-                            });
-                            // Append the new rule to the parent rule
-                            (_b = parentRule.parent) === null || _b === void 0 ? void 0 : _b.append(targetRule);
-                            declarationsToApply.forEach((d) => targetRule.append(d.clone()));
-                            // If we have pseudo-classes, we don't need to apply them again
-                            return;
-                        }
-                        // Handle responsive variants by creating a new rule inside a media query
-                        if (mediaQueryVariant) {
-                            const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
-                            let mqAtRule = mediaQueries.get(mqParam);
-                            if (!mqAtRule) {
-                                mqAtRule = new (require("postcss").AtRule)({
-                                    name: "media",
-                                    params: mqParam,
-                                });
-                                mediaQueries.set(mqParam, mqAtRule);
-                                root.append(mqAtRule); // Append media query to root once
-                            }
-                            // Create a new rule inside the media query, with the parent's selector
-                            const newResponsiveRule = new postcss_1.Rule({
-                                selector: parentRule.selector,
-                            });
-                            declarationsToApply.forEach((d) => newResponsiveRule.append(d.clone()));
-                            mqAtRule.append(newResponsiveRule);
-                        }
-                        else {
-                            // No media query, append declarations directly to the parent rule
-                            declarationsToApply.forEach((d) => parentRule.append(d.clone()));
-                        }
-                    }
-                    else {
-                        console.warn(`RelaxCSS: Could not find utility for @apply '${cls}'. Base class sought: '${baseClassToApply}'.`);
-                    }
-                });
-            });
-            // Aggregate Transform and Filter properties
-            root.walkRules((rule) => {
-                let transformDeclarations = [];
-                let filterDeclarations = [];
-                let backdropFilterDeclarations = [];
-                rule.walkDecls((decl) => {
-                    if (decl.prop === "--relax-transform") {
-                        transformDeclarations.push(decl);
-                        decl.remove();
-                    }
-                    else if (decl.prop === "--relax-filter") {
-                        filterDeclarations.push(decl);
-                        decl.remove();
-                    }
-                    else if (decl.prop === "--relax-backdrop-filter") {
-                        backdropFilterDeclarations.push(decl);
-                        decl.remove();
-                    }
-                });
-                if (transformDeclarations.length > 0) {
-                    const transformComponents = [];
-                    transformDeclarations.forEach((decl) => {
-                        const className = decl.value;
-                        const parts = className.split("-");
-                        const prefix = parts[0];
-                        const suffix = parts.slice(1).join("-");
-                        if (prefix === "scale-x") {
-                            const value = get(mergedConfig.theme.opacity, suffix); // using opacity scale for 0-100 values
-                            if (value !== undefined)
-                                transformComponents.push(`scaleX(${value})`);
-                        }
-                        else if (prefix === "scale-y") {
-                            const value = get(mergedConfig.theme.opacity, suffix);
-                            if (value !== undefined)
-                                transformComponents.push(`scaleY(${value})`);
-                        }
-                        else if (prefix === "scale") {
-                            const value = get(mergedConfig.theme.opacity, suffix);
-                            if (value !== undefined)
-                                transformComponents.push(`scale(${value})`);
-                        }
-                        else if (prefix === "rotate") {
-                            const value = get(mergedConfig.theme.spacing, suffix); // assuming spacing has angle values like '45' for 45deg
-                            if (value !== undefined)
-                                transformComponents.push(`rotate(${value}deg)`);
-                        }
-                        else if (prefix === "translate-x") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                transformComponents.push(`translateX(${value})`);
-                        }
-                        else if (prefix === "translate-y") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                transformComponents.push(`translateY(${value})`);
-                        }
-                        else if (prefix === "skew-x") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                transformComponents.push(`skewX(${value}deg)`);
-                        }
-                        else if (prefix === "skew-y") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                transformComponents.push(`skewY(${value}deg)`);
-                        }
-                    });
-                    if (transformComponents.length > 0) {
-                        rule.append(new postcss_1.Declaration({
-                            prop: "transform",
-                            value: transformComponents.join(" "),
-                        }));
-                    }
-                }
-                if (filterDeclarations.length > 0) {
-                    const filterComponents = [];
-                    filterDeclarations.forEach((decl) => {
-                        const className = decl.value;
-                        const parts = className.split("-");
-                        const prefix = parts[0];
-                        const suffix = parts.slice(1).join("-");
-                        if (prefix === "blur") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                filterComponents.push(`blur(${value})`);
-                        }
-                        else if (prefix === "brightness") {
-                            const value = get(mergedConfig.theme.opacity, suffix);
-                            if (value !== undefined)
-                                filterComponents.push(`brightness(${value})`);
-                        }
-                        else if (prefix === "contrast") {
-                            const value = get(mergedConfig.theme.opacity, suffix);
-                            if (value !== undefined)
-                                filterComponents.push(`contrast(${value})`);
-                        }
-                        else if (prefix === "drop-shadow") {
-                            const value = get(mergedConfig.theme.boxShadow, suffix);
-                            if (value !== undefined)
-                                filterComponents.push(`drop-shadow(${value})`);
-                        }
-                        else if (prefix === "grayscale") {
-                            filterComponents.push(`grayscale(1)`);
-                        }
-                        else if (prefix === "hue-rotate") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                filterComponents.push(`hue-rotate(${value}deg)`);
-                        }
-                        else if (prefix === "invert") {
-                            filterComponents.push(`invert(1)`);
-                        }
-                        else if (prefix === "saturate") {
-                            const value = get(mergedConfig.theme.opacity, suffix);
-                            if (value !== undefined)
-                                filterComponents.push(`saturate(${value})`);
-                        }
-                        else if (prefix === "sepia") {
-                            filterComponents.push(`sepia(1)`);
-                        }
-                    });
-                    if (filterComponents.length > 0) {
-                        rule.append(new postcss_1.Declaration({
-                            prop: "filter",
-                            value: filterComponents.join(" "),
-                        }));
-                    }
-                }
-                if (backdropFilterDeclarations.length > 0) {
-                    const backdropFilterComponents = [];
-                    backdropFilterDeclarations.forEach((decl) => {
-                        const className = decl.value;
-                        const parts = className.split("-");
-                        const prefix = parts[0];
-                        const suffix = parts.slice(1).join("-");
-                        if (prefix === "backdrop-blur") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
-                            if (value !== undefined)
-                                backdropFilterComponents.push(`blur(${value})`);
-                        }
-                        // Add other backdrop filters here
-                    });
-                    if (backdropFilterComponents.length > 0) {
-                        rule.append(new postcss_1.Declaration({
-                            prop: "backdrop-filter",
-                            value: backdropFilterComponents.join(" "),
-                        }));
-                    }
-                }
-            });
-            console.log("RelaxCSS plugin finished processing.");
-        },
-    };
-};
-plugin.postcss = true;
 // Support for custom input like bg-[#222], p-[4px], etc.
 function parseArbitraryValue(className, config) {
     // e.g. bg-[#222], p-[4px], text-[red], w-[100px], m-[1rem], etc.
@@ -1568,6 +1123,21 @@ function generateUtilityCssWithArbitrary(className, config) {
 // Patch plugin to use the new generateUtilityCssWithArbitrary
 const patchedPlugin = (opts) => {
     const mergedConfig = (0, lodash_merge_1.default)(defaultConfig, opts);
+    // --- Plugin System: User-defined Utilities ---
+    let userUtilities = {};
+    if (Array.isArray(mergedConfig.plugins)) {
+        mergedConfig.plugins.forEach((pluginFn) => {
+            if (typeof pluginFn === "function") {
+                pluginFn({
+                    addUtilities: (utils) => {
+                        userUtilities = { ...userUtilities, ...utils };
+                    },
+                    config: mergedConfig,
+                    postcss: postcss_2.default
+                });
+            }
+        });
+    }
     // Patch all usages of generateUtilityCss in the plugin
     // (copy-paste the plugin code, replacing generateUtilityCss with generateUtilityCssWithArbitrary)
     // --- BEGIN PATCHED PLUGIN BODY ---
@@ -1723,9 +1293,19 @@ const patchedPlugin = (opts) => {
             allPossibleUtilityClasses.add("overflow-y-scroll");
             allPossibleUtilityClasses.add("overflow-y-clip");
             // Add more as needed based on your `generateUtilityCss` switch cases
+            // add the user-defined utilities
+            Object.keys(userUtilities).forEach((utilityName) => {
+                allPossibleUtilityClasses.add(utilityName);
+            });
             // Generate declarations for all base utilities and store them
             allPossibleUtilityClasses.forEach((className) => {
-                const declarations = generateUtilityCssWithArbitrary(className, mergedConfig);
+                let declarations;
+                if (userUtilities[className]) {
+                    declarations = userUtilities[className](mergedConfig);
+                }
+                else {
+                    declarations = generateUtilityCss(className, mergedConfig);
+                }
                 if (declarations.length > 0) {
                     generatedUtilityDeclarations.set(className, declarations);
                 }
@@ -1771,7 +1351,7 @@ const patchedPlugin = (opts) => {
                     let declarationsToApply = generatedUtilityDeclarations.get(baseClassToApply);
                     // If not found, try arbitrary value
                     if (!declarationsToApply || declarationsToApply.length === 0) {
-                        declarationsToApply = parseArbitraryValue(baseClassToApply, mergedConfig);
+                        declarationsToApply = generateUtilityCssWithArbitrary(baseClassToApply, mergedConfig);
                     }
                     if (declarationsToApply && declarationsToApply.length > 0) {
                         let targetRule = parentRule;

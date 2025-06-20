@@ -399,20 +399,9 @@ function processFiles() {
             });
         }
     });
-    // Generate a "JIT" CSS file for found classes (for non-CSS sources)
-    console.log("[RelaxCSS] Found classes:", Array.from(foundClasses).join(", "));
-    let jitCss = "";
-    if (foundClasses.size > 0) {
-        jitCss += "/* RelaxCSS JIT classes from project files */\n";
-        foundClasses.forEach((cls) => {
-            if (!cls.trim())
-                return;
-            if (!cls.includes(":")) {
-                jitCss += `.${cls} { @apply ${cls}; }\n`;
-            }
-        });
-    }
-    const finalCss = combinedCss + "\n" + jitCss;
+    // Do NOT generate a "JIT" CSS file for found classes (handled by plugin)
+    // Only pass the combinedCss (with @apply) to PostCSS
+    const finalCss = combinedCss;
     (0, postcss_1.default)([(0, index_1.default)()])
         .process(finalCss, { from: undefined })
         .then((result) => {

@@ -6,3 +6,7 @@
 .container {
   @apply flex bg-[#222] md:hover:bg-[#333];
 }
+
+.my-box {
+  @apply fancy-border;
+}
