@@ -8,9 +8,13 @@
 }
 
 .my-box {
-  @apply fancy-border dark:p-4;
+  @apply fancy-border;
 }
 
 .ravi {
   @apply text-2xl;
+}
+
+.kishan {
+  @apply text-3xl;
 }

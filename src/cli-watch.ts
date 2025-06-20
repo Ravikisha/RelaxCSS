@@ -368,6 +368,7 @@ function extractClassNames(content: string): string[] {
   while ((match = classRegex.exec(content))) {
     matches.push(...match[1].split(/\s+/).filter(Boolean));
   }
+  console.log(`[RelaxCSS] Found classes: ${matches.join(", ")}`);
   return matches.filter((cls => !cls.startsWith("..."))); // Exclude RelaxCSS classes
 }
 
@@ -379,6 +380,7 @@ function extractApplyClasses(content: string): string[] {
   while ((match = applyRegex.exec(content))) {
     matches.push(...match[1].split(/\s+/).filter(Boolean));
   }
+  console.log(`[RelaxCSS] Found @apply classes: ${matches.join(", ")}`);
   return matches;
 }
 
@@ -387,6 +389,8 @@ function processFiles() {
 
   let combinedCss = "";
   let foundClasses = new Set<string>();
+
+  console.log(`[RelaxCSS] Processing files matching: ${files}`);
 
   files.forEach((file) => {
     const ext = path.extname(file).toLowerCase().replace(/^\./, "");
@@ -403,6 +407,8 @@ function processFiles() {
       });
     }
   });
+
+  console.log(`[RelaxCSS] Found ${foundClasses.size} unique classes: ${[...foundClasses].join(", ")}`);
 
   // Do NOT generate a "JIT" CSS file for found classes (handled by plugin)
   // Only pass the combinedCss (with @apply) to PostCSS

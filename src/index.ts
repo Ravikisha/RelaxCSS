@@ -45,6 +45,8 @@ interface RelaxConfig {
     overrides?: string; // User can provide custom CSS string to override the reset
     disableSections?: string[]; // List of section keys to disable (e.g., ['box-sizing', 'margin-padding'])
   };
+  darkMode?: 'class' | 'media' | 'both';
+  rtl?: boolean; // NEW: enable RTL logical property support
 }
 
 const defaultConfig: RelaxConfig = {
@@ -53,7 +55,7 @@ const defaultConfig: RelaxConfig = {
       addUtilities({
         "fancy-border": () => [
           // You can use the config if needed
-          new Declaration({ prop: "border", value: "2px dashed magenta" })
+          new Declaration({ prop: "border", value: "2px dashed magenta" }),
         ],
       });
     },
@@ -351,9 +353,9 @@ const defaultConfig: RelaxConfig = {
   },
   preflight: {
     enabled: true, // or false to disable all
-    disableSections: ['box-sizing', 'list-style'], // disables only these parts
-    overrides: 'body { background: #fafafa; }' // custom CSS injected at the top
-  }
+    disableSections: ["box-sizing", "list-style"], // disables only these parts
+    overrides: "body { background: #fafafa; }", // custom CSS injected at the top
+  },
 };
 
 // --- 2. Helper Functions ---
@@ -382,6 +384,7 @@ function generateUtilityCss(
   config: RelaxConfig
 ): Declaration[] {
   const declarations: Declaration[] = [];
+  const rtl = config.rtl;
 
   const arbitraryMatch = className.match(/^\[(.*?)\]$/);
   if (arbitraryMatch) {
@@ -1353,9 +1356,66 @@ function generateUtilityCss(
     }
   }
 
+  // Helper for logical properties (RTL-aware)
+  function logicalProp(prop: string, ltr: string, rtlProp: string, value: string) {
+    if (rtl) {
+      return [
+        new Declaration({ prop: prop.replace(ltr, rtlProp), value })
+      ];
+    } else {
+      return [new Declaration({ prop, value })];
+    }
+  }
+
+  // Patch margin/padding/float/text-align for logical properties
+  if (className.startsWith("ml-")) {
+    const value = get(config.theme.spacing, className.substring(3));
+    if (value !== undefined) {
+      if (rtl) {
+        declarations.push(new Declaration({ prop: "margin-inline-end", value }));
+      } else {
+        declarations.push(new Declaration({ prop: "margin-left", value }));
+      }
+    }
+  } else if (className.startsWith("mr-")) {
+    const value = get(config.theme.spacing, className.substring(3));
+    if (value !== undefined) {
+      if (rtl) {
+        declarations.push(new Declaration({ prop: "margin-inline-start", value }));
+      } else {
+        declarations.push(new Declaration({ prop: "margin-right", value }));
+      }
+    }
+  } else if (className.startsWith("pl-")) {
+    const value = get(config.theme.spacing, className.substring(3));
+    if (value !== undefined) {
+      if (rtl) {
+        declarations.push(new Declaration({ prop: "padding-inline-end", value }));
+      } else {
+        declarations.push(new Declaration({ prop: "padding-left", value }));
+      }
+    }
+  } else if (className.startsWith("pr-")) {
+    const value = get(config.theme.spacing, className.substring(3));
+    if (value !== undefined) {
+      if (rtl) {
+        declarations.push(new Declaration({ prop: "padding-inline-start", value }));
+      } else {
+        declarations.push(new Declaration({ prop: "padding-right", value }));
+      }
+    }
+  } else if (className === "float-left") {
+    declarations.push(new Declaration({ prop: rtl ? "float" : "float", value: rtl ? "right" : "left" }));
+  } else if (className === "float-right") {
+    declarations.push(new Declaration({ prop: rtl ? "float" : "float", value: rtl ? "left" : "right" }));
+  } else if (className === "text-left") {
+    declarations.push(new Declaration({ prop: "text-align", value: rtl ? "right" : "left" }));
+  } else if (className === "text-right") {
+    declarations.push(new Declaration({ prop: "text-align", value: rtl ? "left" : "right" }));
+  }
+
   return declarations;
 }
-
 
 // Support for custom input like bg-[#222], p-[4px], etc.
 function parseArbitraryValue(
@@ -1476,7 +1536,7 @@ const patchedPlugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
             userUtilities = { ...userUtilities, ...utils };
           },
           config: mergedConfig,
-          postcss
+          postcss,
         });
       }
     });
@@ -1822,35 +1882,39 @@ const patchedPlugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
       if (preflightConfig.enabled !== false) {
         // Default preflight sections
         const preflightSections: Record<string, string> = {
-          'box-sizing': `*,*::before,*::after{box-sizing:border-box;}`,
-          'margin-padding': `body,h1,h2,h3,h4,h5,h6,p,ul,ol,li,figure,figcaption,blockquote,dl,dd{margin:0;padding:0;}`,
-          'list-style': `ul:not([class]),ol:not([class]){list-style:none;}`,
-          'font-family': `body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}`,
-          'media': `img,picture,video,canvas,svg{display:block;max-width:100%;}`,
-          'form': `button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0;}`,
-          'table': `table{border-collapse:collapse;}th,td{padding:0;}`
+          "box-sizing": `*,*::before,*::after{box-sizing:border-box;}`,
+          "margin-padding": `body,h1,h2,h3,h4,h5,h6,p,ul,ol,li,figure,figcaption,blockquote,dl,dd{margin:0;padding:0;}`,
+          "list-style": `ul:not([class]),ol:not([class]){list-style:none;}`,
+          "font-family": `body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}`,
+          media: `img,picture,video,canvas,svg{display:block;max-width:100%;}`,
+          form: `button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0;}`,
+          table: `table{border-collapse:collapse;}th,td{padding:0;}`,
         };
         // Remove disabled sections
         const enabledSections = Object.keys(preflightSections).filter(
-          key => !preflightConfig.disableSections?.includes(key)
+          (key) => !preflightConfig.disableSections?.includes(key)
         );
         // Remove any existing preflight rules (if re-running)
-        root.walkComments(comment => {
-          if (comment.text && comment.text.includes('RelaxCSS Preflight')) {
+        root.walkComments((comment) => {
+          if (comment.text && comment.text.includes("RelaxCSS Preflight")) {
             comment.remove();
           }
         });
         // Inject enabled preflight sections
-        enabledSections.forEach(key => {
+        enabledSections.forEach((key) => {
           root.prepend(
-            new (require('postcss').Comment)({ text: `RelaxCSS Preflight: ${key}` })
+            new (require("postcss").Comment)({
+              text: `RelaxCSS Preflight: ${key}`,
+            })
           );
           root.prepend(preflightSections[key]);
         });
         // Inject user overrides if provided
         if (preflightConfig.overrides && preflightConfig.overrides.trim()) {
           root.prepend(
-            new (require('postcss').Comment)({ text: 'RelaxCSS Preflight: user overrides' })
+            new (require("postcss").Comment)({
+              text: "RelaxCSS Preflight: user overrides",
+            })
           );
           root.prepend(preflightConfig.overrides);
         }

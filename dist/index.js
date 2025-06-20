@@ -11,7 +11,7 @@ const defaultConfig = {
             addUtilities({
                 "fancy-border": () => [
                     // You can use the config if needed
-                    new postcss_1.Declaration({ prop: "border", value: "2px dashed magenta" })
+                    new postcss_1.Declaration({ prop: "border", value: "2px dashed magenta" }),
                 ],
             });
         },
@@ -307,9 +307,9 @@ const defaultConfig = {
     },
     preflight: {
         enabled: true, // or false to disable all
-        disableSections: ['box-sizing', 'list-style'], // disables only these parts
-        overrides: 'body { background: #fafafa; }' // custom CSS injected at the top
-    }
+        disableSections: ["box-sizing", "list-style"], // disables only these parts
+        overrides: "body { background: #fafafa; }", // custom CSS injected at the top
+    },
 };
 // --- 2. Helper Functions ---
 // Universal getter for theme values
@@ -330,6 +330,7 @@ function get(obj, path, defaultValue) {
 function generateUtilityCss(className, config) {
     var _a;
     const declarations = [];
+    const rtl = config.rtl;
     const arbitraryMatch = className.match(/^\[(.*?)\]$/);
     if (arbitraryMatch) {
         // For arbitrary values like `w-[100px]`
@@ -1027,6 +1028,74 @@ function generateUtilityCss(className, config) {
             }
         }
     }
+    // Helper for logical properties (RTL-aware)
+    function logicalProp(prop, ltr, rtlProp, value) {
+        if (rtl) {
+            return [
+                new postcss_1.Declaration({ prop: prop.replace(ltr, rtlProp), value })
+            ];
+        }
+        else {
+            return [new postcss_1.Declaration({ prop, value })];
+        }
+    }
+    // Patch margin/padding/float/text-align for logical properties
+    if (className.startsWith("ml-")) {
+        const value = get(config.theme.spacing, className.substring(3));
+        if (value !== undefined) {
+            if (rtl) {
+                declarations.push(new postcss_1.Declaration({ prop: "margin-inline-end", value }));
+            }
+            else {
+                declarations.push(new postcss_1.Declaration({ prop: "margin-left", value }));
+            }
+        }
+    }
+    else if (className.startsWith("mr-")) {
+        const value = get(config.theme.spacing, className.substring(3));
+        if (value !== undefined) {
+            if (rtl) {
+                declarations.push(new postcss_1.Declaration({ prop: "margin-inline-start", value }));
+            }
+            else {
+                declarations.push(new postcss_1.Declaration({ prop: "margin-right", value }));
+            }
+        }
+    }
+    else if (className.startsWith("pl-")) {
+        const value = get(config.theme.spacing, className.substring(3));
+        if (value !== undefined) {
+            if (rtl) {
+                declarations.push(new postcss_1.Declaration({ prop: "padding-inline-end", value }));
+            }
+            else {
+                declarations.push(new postcss_1.Declaration({ prop: "padding-left", value }));
+            }
+        }
+    }
+    else if (className.startsWith("pr-")) {
+        const value = get(config.theme.spacing, className.substring(3));
+        if (value !== undefined) {
+            if (rtl) {
+                declarations.push(new postcss_1.Declaration({ prop: "padding-inline-start", value }));
+            }
+            else {
+                declarations.push(new postcss_1.Declaration({ prop: "padding-right", value }));
+            }
+        }
+    }
+    else if (className === "float-left") {
+        declarations.push(new postcss_1.Declaration({ prop: rtl ? "float" : "float", value: rtl ? "right" : "left" }));
+    }
+    else if (className === "float-right") {
+        declarations.push(new postcss_1.Declaration({ prop: rtl ? "float" : "float", value: rtl ? "left" : "right" }));
+    }
+    else if (className === "text-left") {
+        declarations.push(new postcss_1.Declaration({ prop: "text-align", value: rtl ? "right" : "left" }));
+    }
+    else if (className === "text-right") {
+        declarations.push(new postcss_1.Declaration({ prop: "text-align", value: rtl ? "left" : "right" }));
+    }
     return declarations;
 }
 // Support for custom input like bg-[#222], p-[4px], etc.
@@ -1138,7 +1207,7 @@ const patchedPlugin = (opts) => {
                         userUtilities = { ...userUtilities, ...utils };
                     },
                     config: mergedConfig,
-                    postcss: postcss_2.default
+                    postcss: postcss_2.default,
                 });
             }
         });
@@ -1447,30 +1516,34 @@ const patchedPlugin = (opts) => {
             if (preflightConfig.enabled !== false) {
                 // Default preflight sections
                 const preflightSections = {
-                    'box-sizing': `*,*::before,*::after{box-sizing:border-box;}`,
-                    'margin-padding': `body,h1,h2,h3,h4,h5,h6,p,ul,ol,li,figure,figcaption,blockquote,dl,dd{margin:0;padding:0;}`,
-                    'list-style': `ul:not([class]),ol:not([class]){list-style:none;}`,
-                    'font-family': `body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}`,
-                    'media': `img,picture,video,canvas,svg{display:block;max-width:100%;}`,
-                    'form': `button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0;}`,
-                    'table': `table{border-collapse:collapse;}th,td{padding:0;}`
+                    "box-sizing": `*,*::before,*::after{box-sizing:border-box;}`,
+                    "margin-padding": `body,h1,h2,h3,h4,h5,h6,p,ul,ol,li,figure,figcaption,blockquote,dl,dd{margin:0;padding:0;}`,
+                    "list-style": `ul:not([class]),ol:not([class]){list-style:none;}`,
+                    "font-family": `body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}`,
+                    media: `img,picture,video,canvas,svg{display:block;max-width:100%;}`,
+                    form: `button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0;}`,
+                    table: `table{border-collapse:collapse;}th,td{padding:0;}`,
                 };
                 // Remove disabled sections
-                const enabledSections = Object.keys(preflightSections).filter(key => { var _a; return !((_a = preflightConfig.disableSections) === null || _a === void 0 ? void 0 : _a.includes(key)); });
+                const enabledSections = Object.keys(preflightSections).filter((key) => { var _a; return !((_a = preflightConfig.disableSections) === null || _a === void 0 ? void 0 : _a.includes(key)); });
                 // Remove any existing preflight rules (if re-running)
-                root.walkComments(comment => {
-                    if (comment.text && comment.text.includes('RelaxCSS Preflight')) {
+                root.walkComments((comment) => {
+                    if (comment.text && comment.text.includes("RelaxCSS Preflight")) {
                         comment.remove();
                     }
                 });
                 // Inject enabled preflight sections
-                enabledSections.forEach(key => {
-                    root.prepend(new (require('postcss').Comment)({ text: `RelaxCSS Preflight: ${key}` }));
+                enabledSections.forEach((key) => {
+                    root.prepend(new (require("postcss").Comment)({
+                        text: `RelaxCSS Preflight: ${key}`,
+                    }));
                     root.prepend(preflightSections[key]);
                 });
                 // Inject user overrides if provided
                 if (preflightConfig.overrides && preflightConfig.overrides.trim()) {
-                    root.prepend(new (require('postcss').Comment)({ text: 'RelaxCSS Preflight: user overrides' }));
+                    root.prepend(new (require("postcss").Comment)({
+                        text: "RelaxCSS Preflight: user overrides",
+                    }));
                     root.prepend(preflightConfig.overrides);
                 }
             }
