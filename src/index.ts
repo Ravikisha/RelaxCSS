@@ -1520,6 +1520,12 @@ const plugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
 
       root.walkAtRules((atRule) => {
         if (atRule.name === "relax") {
+          // add comment to the root node
+          root.prepend(
+            new (require("postcss").Comment)({
+              text: "RelaxCSS processed with @relax directive",
+            })
+          );
           atRule.remove(); // Remove the @relax directive
         }
       });
@@ -1545,6 +1551,7 @@ const plugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
             pseudoClassVariants = remainingParts.filter((part) =>
               mergedConfig.variants.pseudoClasses.includes(part)
             );
+            console.log("Pseudo class variants found:", pseudoClassVariants);
             baseClassToApply = remainingParts
               .filter(
                 (part) => !mergedConfig.variants.pseudoClasses.includes(part)
@@ -1564,6 +1571,7 @@ const plugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
             if (pseudoClassVariants.length > 0) {
               // Create a new rule with the combined selector for pseudo-classes
               let combinedPseudoSelector = currentSelector;
+
               pseudoClassVariants.forEach((pseudo) => {
                 if (pseudo === "group-hover") {
                   combinedPseudoSelector = `:merge(.group):hover ${combinedPseudoSelector}`;
@@ -1571,12 +1579,61 @@ const plugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
                   combinedPseudoSelector += `:${pseudo}`;
                 }
               });
-              // This is where it gets tricky for @apply - we cannot easily nest rules within existing rules with new selectors.
-              // For simplicity, we will append declarations to the parent rule, and let the *generated* utility class
-              // handle its own pseudo-selectors. If an @apply includes a pseudo-class, it means we expect
-              // the *base* utility for that pseudo-class to exist, e.g. `.hover\:px-4`.
-              // For @apply, we mostly care about applying the *declarations*. The variant logic in the utility generation step
-              // already creates the correct selectors.
+
+                console.log(
+                "Applying pseudo-classes to selector:",
+                combinedPseudoSelector
+                );
+
+                // --- Support stacking of responsive and pseudo variants ---
+                // If we have a mediaQueryVariant, wrap the pseudo rule in the media query
+                if (mediaQueryVariant) {
+                const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
+                let mqAtRule = mediaQueries.get(mqParam);
+                if (!mqAtRule) {
+                  mqAtRule = new (require("postcss").AtRule)({
+                  name: "media",
+                  params: mqParam,
+                  });
+                  mediaQueries.set(mqParam, mqAtRule);
+                  root.append(mqAtRule);
+                }
+                // Create a new rule with the modified selector inside the media query
+                targetRule = new Rule({
+                  selector: combinedPseudoSelector,
+                });
+                declarationsToApply.forEach((d) =>
+                  targetRule.append(d.clone())
+                );
+                mqAtRule.append(targetRule);
+                } else {
+                // No media query, just append the pseudo rule to the parent
+                targetRule = new Rule({
+                  selector: combinedPseudoSelector,
+                });
+                declarationsToApply.forEach((d) =>
+                  targetRule.append(d.clone())
+                );
+                parentRule.parent?.append(targetRule);
+                }
+
+                // If we have pseudo-classes, we don't need to apply them again
+                return;
+
+              // Create a new rule with the modified selector
+              targetRule = new Rule({
+                selector: combinedPseudoSelector,
+              });
+              // Append the new rule to the parent rule
+              parentRule.parent?.append(targetRule);
+
+              declarationsToApply.forEach((d) =>
+                targetRule.append(d.clone())
+              );
+
+              // If we have pseudo-classes, we don't need to apply them again
+              return;
+
             }
 
             // Handle responsive variants by creating a new rule inside a media query
