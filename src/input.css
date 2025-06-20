@@ -10,3 +10,7 @@
 .box {
   @apply bg-[#222] shadow-md rounded-lg p-6 flex flex-col items-center sm:hover:bg-gray-800;
 }
+
+.ravi {
+  @apply bg-[#222] p-[1.5rem] rounded-lg shadow-lg flex flex-col items-center;
+}

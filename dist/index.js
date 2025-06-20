@@ -1020,7 +1020,6 @@ const plugin = (opts) => {
         postcssPlugin: "relax-css",
         Once(root) {
             console.log("RelaxCSS plugin started.");
-            console.log("Initial root nodes count:", root.nodes.length);
             // This map will store the generated declarations for *base* utility classes
             // E.g., 'px-4' -> [padding-left: 1rem, padding-right: 1rem]
             const generatedUtilityDeclarations = new Map();
@@ -1221,7 +1220,6 @@ const plugin = (opts) => {
                         // Check for pseudo-class variants (from the potentially remaining parts)
                         const remainingParts = baseClassToApply.split(":");
                         pseudoClassVariants = remainingParts.filter((part) => mergedConfig.variants.pseudoClasses.includes(part));
-                        console.log("Pseudo class variants found:", pseudoClassVariants);
                         baseClassToApply = remainingParts
                             .filter((part) => !mergedConfig.variants.pseudoClasses.includes(part))
                             .join(":");
@@ -1243,7 +1241,6 @@ const plugin = (opts) => {
                                     combinedPseudoSelector += `:${pseudo}`;
                                 }
                             });
-                            console.log("Applying pseudo-classes to selector:", combinedPseudoSelector);
                             // --- Support stacking of responsive and pseudo variants ---
                             // If we have a mediaQueryVariant, wrap the pseudo rule in the media query
                             if (mediaQueryVariant) {
@@ -1464,9 +1461,522 @@ const plugin = (opts) => {
                 }
             });
             console.log("RelaxCSS plugin finished processing.");
-            console.log("Final root nodes count:", root.nodes.length);
         },
     };
 };
 plugin.postcss = true;
-module.exports = plugin;
+// Support for custom input like bg-[#222], p-[4px], etc.
+function parseArbitraryValue(className, config) {
+    // e.g. bg-[#222], p-[4px], text-[red], w-[100px]
+    const arbitraryMatch = className.match(/^([a-z-]+)-\[(.+)\]$/i);
+    if (!arbitraryMatch)
+        return [];
+    const prefix = arbitraryMatch[1];
+    const value = arbitraryMatch[2];
+    // Map prefix to CSS property
+    switch (prefix) {
+        case "bg":
+            return [new postcss_1.Declaration({ prop: "background-color", value })];
+        case "text":
+            return [new postcss_1.Declaration({ prop: "color", value })];
+        case "border":
+            return [new postcss_1.Declaration({ prop: "border-color", value })];
+        case "w":
+            return [new postcss_1.Declaration({ prop: "width", value })];
+        case "h":
+            return [new postcss_1.Declaration({ prop: "height", value })];
+        case "min-w":
+            return [new postcss_1.Declaration({ prop: "min-width", value })];
+        case "min-h":
+            return [new postcss_1.Declaration({ prop: "min-height", value })];
+        case "max-w":
+            return [new postcss_1.Declaration({ prop: "max-width", value })];
+        case "max-h":
+            return [new postcss_1.Declaration({ prop: "max-height", value })];
+        case "p":
+            return [new postcss_1.Declaration({ prop: "padding", value })];
+        case "px":
+            return [
+                new postcss_1.Declaration({ prop: "padding-left", value }),
+                new postcss_1.Declaration({ prop: "padding-right", value }),
+            ];
+        case "py":
+            return [
+                new postcss_1.Declaration({ prop: "padding-top", value }),
+                new postcss_1.Declaration({ prop: "padding-bottom", value }),
+            ];
+        case "pt":
+            return [new postcss_1.Declaration({ prop: "padding-top", value })];
+        case "pr":
+            return [new postcss_1.Declaration({ prop: "padding-right", value })];
+        case "pb":
+            return [new postcss_1.Declaration({ prop: "padding-bottom", value })];
+        case "pl":
+            return [new postcss_1.Declaration({ prop: "padding-left", value })];
+        case "m":
+            return [new postcss_1.Declaration({ prop: "margin", value })];
+        case "mx":
+            return [
+                new postcss_1.Declaration({ prop: "margin-left", value }),
+                new postcss_1.Declaration({ prop: "margin-right", value }),
+            ];
+        case "my":
+            return [
+                new postcss_1.Declaration({ prop: "margin-top", value }),
+                new postcss_1.Declaration({ prop: "margin-bottom", value }),
+            ];
+        case "mt":
+            return [new postcss_1.Declaration({ prop: "margin-top", value })];
+        case "mr":
+            return [new postcss_1.Declaration({ prop: "margin-right", value })];
+        case "mb":
+            return [new postcss_1.Declaration({ prop: "margin-bottom", value })];
+        case "ml":
+            return [new postcss_1.Declaration({ prop: "margin-left", value })];
+        case "rounded":
+            return [new postcss_1.Declaration({ prop: "border-radius", value })];
+        case "shadow":
+            return [new postcss_1.Declaration({ prop: "box-shadow", value })];
+        case "z":
+            return [new postcss_1.Declaration({ prop: "z-index", value })];
+        case "opacity":
+            return [new postcss_1.Declaration({ prop: "opacity", value })];
+        case "top":
+        case "right":
+        case "bottom":
+        case "left":
+            return [new postcss_1.Declaration({ prop: prefix, value })];
+        default:
+            // fallback: try to use as property directly (dangerous, but useful for advanced users)
+            return [];
+    }
+}
+// Patch generateUtilityCss to support arbitrary values
+const originalGenerateUtilityCss = generateUtilityCss;
+function generateUtilityCssWithArbitrary(className, config) {
+    // Try arbitrary value first
+    const arbitrary = parseArbitraryValue(className, config);
+    if (arbitrary.length > 0)
+        return arbitrary;
+    // Fallback to original
+    return originalGenerateUtilityCss(className, config);
+}
+// Patch plugin to use the new generateUtilityCssWithArbitrary
+const patchedPlugin = (opts) => {
+    const mergedConfig = (0, lodash_merge_1.default)(defaultConfig, opts);
+    // Patch all usages of generateUtilityCss in the plugin
+    // (copy-paste the plugin code, replacing generateUtilityCss with generateUtilityCssWithArbitrary)
+    // --- BEGIN PATCHED PLUGIN BODY ---
+    return {
+        postcssPlugin: "relax-css",
+        Once(root) {
+            console.log("RelaxCSS plugin started.");
+            const generatedUtilityDeclarations = new Map();
+            const allPossibleUtilityClasses = new Set();
+            Object.keys(mergedConfig.theme).forEach((themeSectionKey) => {
+                const themeSection = mergedConfig.theme[themeSectionKey];
+                if (typeof themeSection === "object" && themeSection !== null) {
+                    Object.keys(themeSection).forEach((key) => {
+                        if (themeSectionKey === "spacing") {
+                            allPossibleUtilityClasses.add(`p-${key}`);
+                            allPossibleUtilityClasses.add(`m-${key}`);
+                            allPossibleUtilityClasses.add(`px-${key}`);
+                            allPossibleUtilityClasses.add(`py-${key}`);
+                            allPossibleUtilityClasses.add(`pt-${key}`);
+                            allPossibleUtilityClasses.add(`pr-${key}`);
+                            allPossibleUtilityClasses.add(`pb-${key}`);
+                            allPossibleUtilityClasses.add(`pl-${key}`);
+                            allPossibleUtilityClasses.add(`mx-${key}`);
+                            allPossibleUtilityClasses.add(`my-${key}`);
+                            allPossibleUtilityClasses.add(`mt-${key}`);
+                            allPossibleUtilityClasses.add(`mr-${key}`);
+                            allPossibleUtilityClasses.add(`mb-${key}`);
+                            allPossibleUtilityClasses.add(`ml-${key}`);
+                            allPossibleUtilityClasses.add(`w-${key}`);
+                            allPossibleUtilityClasses.add(`h-${key}`);
+                            allPossibleUtilityClasses.add(`min-w-${key}`);
+                            allPossibleUtilityClasses.add(`min-h-${key}`);
+                            allPossibleUtilityClasses.add(`top-${key}`);
+                            allPossibleUtilityClasses.add(`right-${key}`);
+                            allPossibleUtilityClasses.add(`bottom-${key}`);
+                            allPossibleUtilityClasses.add(`left-${key}`);
+                            allPossibleUtilityClasses.add(`inset-${key}`);
+                            allPossibleUtilityClasses.add(`inset-x-${key}`);
+                            allPossibleUtilityClasses.add(`inset-y-${key}`);
+                            if (key === "auto") {
+                                allPossibleUtilityClasses.add(`m-auto`);
+                                allPossibleUtilityClasses.add(`mx-auto`);
+                                allPossibleUtilityClasses.add(`my-auto`);
+                            }
+                        }
+                        else if (themeSectionKey === "maxWidth") {
+                            allPossibleUtilityClasses.add(`max-w-${key}`);
+                        }
+                        else if (themeSectionKey === "maxHeight") {
+                            allPossibleUtilityClasses.add(`max-h-${key}`);
+                        }
+                        else if (themeSectionKey === "colors") {
+                            if (typeof themeSection[key] === "object" &&
+                                themeSection[key] !== null) {
+                                Object.keys(themeSection[key]).forEach((shade) => {
+                                    allPossibleUtilityClasses.add(`bg-${key}-${shade}`);
+                                    allPossibleUtilityClasses.add(`text-${key}-${shade}`);
+                                    allPossibleUtilityClasses.add(`border-${key}-${shade}`);
+                                    allPossibleUtilityClasses.add(`ring-offset-${key}-${shade}`);
+                                });
+                            }
+                            else {
+                                allPossibleUtilityClasses.add(`bg-${key}`);
+                                allPossibleUtilityClasses.add(`text-${key}`);
+                                allPossibleUtilityClasses.add(`border-${key}`);
+                            }
+                        }
+                        else if (themeSectionKey === "fontSize") {
+                            allPossibleUtilityClasses.add(`text-${key}`);
+                        }
+                        else if (themeSectionKey === "fontWeight")
+                            allPossibleUtilityClasses.add(`font-${key}`);
+                        else if (themeSectionKey === "lineHeight")
+                            allPossibleUtilityClasses.add(`leading-${key}`);
+                        else if (themeSectionKey === "boxShadow")
+                            allPossibleUtilityClasses.add(`shadow-${key}`);
+                        else if (themeSectionKey === "zIndex")
+                            allPossibleUtilityClasses.add(`z-${key}`);
+                        else if (themeSectionKey === "opacity")
+                            allPossibleUtilityClasses.add(`opacity-${key}`);
+                        else if (themeSectionKey === "borderRadius")
+                            allPossibleUtilityClasses.add(`rounded-${key}`);
+                        else if (themeSectionKey === "borderWidth")
+                            allPossibleUtilityClasses.add(`border-${key}`);
+                        else if (themeSectionKey === "gridTemplateColumns")
+                            allPossibleUtilityClasses.add(`grid-cols-${key}`);
+                        else if (themeSectionKey === "gridTemplateRows")
+                            allPossibleUtilityClasses.add(`grid-rows-${key}`);
+                        else if (themeSectionKey === "flex")
+                            allPossibleUtilityClasses.add(`flex-${key}`);
+                        else if (themeSectionKey === "transitionProperty")
+                            allPossibleUtilityClasses.add(`transition-${key}`);
+                        else if (themeSectionKey === "transitionDuration")
+                            allPossibleUtilityClasses.add(`duration-${key}`);
+                        else if (themeSectionKey === "transitionTimingFunction")
+                            allPossibleUtilityClasses.add(`ease-${key}`);
+                    });
+                }
+            });
+            allPossibleUtilityClasses.add("block");
+            allPossibleUtilityClasses.add("inline");
+            allPossibleUtilityClasses.add("inline-block");
+            allPossibleUtilityClasses.add("hidden");
+            allPossibleUtilityClasses.add("flex");
+            allPossibleUtilityClasses.add("grid");
+            allPossibleUtilityClasses.add("static");
+            allPossibleUtilityClasses.add("relative");
+            allPossibleUtilityClasses.add("absolute");
+            allPossibleUtilityClasses.add("fixed");
+            allPossibleUtilityClasses.add("sticky");
+            allPossibleUtilityClasses.add("border");
+            allPossibleUtilityClasses.add("sr-only");
+            allPossibleUtilityClasses.add("not-sr-only");
+            allPossibleUtilityClasses.add("justify-start");
+            allPossibleUtilityClasses.add("justify-end");
+            allPossibleUtilityClasses.add("justify-center");
+            allPossibleUtilityClasses.add("justify-between");
+            allPossibleUtilityClasses.add("justify-around");
+            allPossibleUtilityClasses.add("justify-evenly");
+            allPossibleUtilityClasses.add("items-start");
+            allPossibleUtilityClasses.add("items-end");
+            allPossibleUtilityClasses.add("items-center");
+            allPossibleUtilityClasses.add("items-baseline");
+            allPossibleUtilityClasses.add("items-stretch");
+            allPossibleUtilityClasses.add("flex-row");
+            allPossibleUtilityClasses.add("flex-col");
+            allPossibleUtilityClasses.add("flex-row-reverse");
+            allPossibleUtilityClasses.add("flex-col-reverse");
+            allPossibleUtilityClasses.add("flex-wrap");
+            allPossibleUtilityClasses.add("flex-wrap-reverse");
+            allPossibleUtilityClasses.add("flex-nowrap");
+            allPossibleUtilityClasses.add("overflow-auto");
+            allPossibleUtilityClasses.add("overflow-hidden");
+            allPossibleUtilityClasses.add("overflow-visible");
+            allPossibleUtilityClasses.add("overflow-scroll");
+            allPossibleUtilityClasses.add("overflow-clip");
+            allPossibleUtilityClasses.add("overflow-x-auto");
+            allPossibleUtilityClasses.add("overflow-x-hidden");
+            allPossibleUtilityClasses.add("overflow-x-visible");
+            allPossibleUtilityClasses.add("overflow-x-scroll");
+            allPossibleUtilityClasses.add("overflow-x-clip");
+            allPossibleUtilityClasses.add("overflow-y-auto");
+            allPossibleUtilityClasses.add("overflow-y-hidden");
+            allPossibleUtilityClasses.add("overflow-y-visible");
+            allPossibleUtilityClasses.add("overflow-y-scroll");
+            allPossibleUtilityClasses.add("overflow-y-clip");
+            allPossibleUtilityClasses.forEach((className) => {
+                const declarations = generateUtilityCssWithArbitrary(className, mergedConfig);
+                if (declarations.length > 0) {
+                    generatedUtilityDeclarations.set(className, declarations);
+                }
+            });
+            const atApplyQueue = [];
+            const mediaQueries = new Map();
+            root.walkRules((rule) => {
+                rule.walkAtRules((atRule) => {
+                    if (atRule.name === "apply") {
+                        const appliedClasses = atRule.params.split(/\s+/).filter(Boolean);
+                        atApplyQueue.push({ rule: rule, classes: appliedClasses });
+                        atRule.remove();
+                    }
+                });
+            });
+            root.walkAtRules((atRule) => {
+                if (atRule.name === "relax") {
+                    root.prepend(new (require("postcss").Comment)({
+                        text: "RelaxCSS processed with @relax directive",
+                    }));
+                    atRule.remove();
+                }
+            });
+            atApplyQueue.forEach(({ rule: parentRule, classes: appliedClasses }) => {
+                appliedClasses.forEach((cls) => {
+                    var _a;
+                    let baseClassToApply = cls;
+                    let mediaQueryVariant;
+                    let pseudoClassVariants = [];
+                    const parts = cls.split(":");
+                    if (parts.length > 1) {
+                        if (mergedConfig.variants.responsive.includes(parts[0])) {
+                            mediaQueryVariant = parts[0];
+                            baseClassToApply = parts.slice(1).join(":");
+                        }
+                        const remainingParts = baseClassToApply.split(":");
+                        pseudoClassVariants = remainingParts.filter((part) => mergedConfig.variants.pseudoClasses.includes(part));
+                        baseClassToApply = remainingParts
+                            .filter((part) => !mergedConfig.variants.pseudoClasses.includes(part))
+                            .join(":");
+                    }
+                    // Support arbitrary values in @apply
+                    let declarationsToApply = generatedUtilityDeclarations.get(baseClassToApply);
+                    // If not found, try arbitrary value
+                    if (!declarationsToApply || declarationsToApply.length === 0) {
+                        declarationsToApply = parseArbitraryValue(baseClassToApply, mergedConfig);
+                    }
+                    if (declarationsToApply && declarationsToApply.length > 0) {
+                        let targetRule = parentRule;
+                        let currentSelector = parentRule.selector;
+                        if (pseudoClassVariants.length > 0) {
+                            let combinedPseudoSelector = currentSelector;
+                            pseudoClassVariants.forEach((pseudo) => {
+                                if (pseudo === "group-hover") {
+                                    combinedPseudoSelector = `:merge(.group):hover ${combinedPseudoSelector}`;
+                                }
+                                else {
+                                    combinedPseudoSelector += `:${pseudo}`;
+                                }
+                            });
+                            if (mediaQueryVariant) {
+                                const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
+                                let mqAtRule = mediaQueries.get(mqParam);
+                                if (!mqAtRule) {
+                                    mqAtRule = new (require("postcss").AtRule)({
+                                        name: "media",
+                                        params: mqParam,
+                                    });
+                                    mediaQueries.set(mqParam, mqAtRule);
+                                    root.append(mqAtRule);
+                                }
+                                targetRule = new postcss_1.Rule({
+                                    selector: combinedPseudoSelector,
+                                });
+                                declarationsToApply.forEach((d) => targetRule.append(d.clone()));
+                                mqAtRule.append(targetRule);
+                            }
+                            else {
+                                targetRule = new postcss_1.Rule({
+                                    selector: combinedPseudoSelector,
+                                });
+                                declarationsToApply.forEach((d) => targetRule.append(d.clone()));
+                                (_a = parentRule.parent) === null || _a === void 0 ? void 0 : _a.append(targetRule);
+                            }
+                            return;
+                        }
+                        if (mediaQueryVariant) {
+                            const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
+                            let mqAtRule = mediaQueries.get(mqParam);
+                            if (!mqAtRule) {
+                                mqAtRule = new (require("postcss").AtRule)({
+                                    name: "media",
+                                    params: mqParam,
+                                });
+                                mediaQueries.set(mqParam, mqAtRule);
+                                root.append(mqAtRule);
+                            }
+                            const newResponsiveRule = new postcss_1.Rule({
+                                selector: parentRule.selector,
+                            });
+                            declarationsToApply.forEach((d) => newResponsiveRule.append(d.clone()));
+                            mqAtRule.append(newResponsiveRule);
+                        }
+                        else {
+                            declarationsToApply.forEach((d) => parentRule.append(d.clone()));
+                        }
+                    }
+                    else {
+                        console.warn(`RelaxCSS: Could not find utility for @apply '${cls}'. Base class sought: '${baseClassToApply}'.`);
+                    }
+                });
+            });
+            // The rest of the plugin body is unchanged (aggregation, etc.)
+            root.walkRules((rule) => {
+                let transformDeclarations = [];
+                let filterDeclarations = [];
+                let backdropFilterDeclarations = [];
+                rule.walkDecls((decl) => {
+                    if (decl.prop === "--relax-transform") {
+                        transformDeclarations.push(decl);
+                        decl.remove();
+                    }
+                    else if (decl.prop === "--relax-filter") {
+                        filterDeclarations.push(decl);
+                        decl.remove();
+                    }
+                    else if (decl.prop === "--relax-backdrop-filter") {
+                        backdropFilterDeclarations.push(decl);
+                        decl.remove();
+                    }
+                });
+                if (transformDeclarations.length > 0) {
+                    const transformComponents = [];
+                    transformDeclarations.forEach((decl) => {
+                        const className = decl.value;
+                        const parts = className.split("-");
+                        const prefix = parts[0];
+                        const suffix = parts.slice(1).join("-");
+                        if (prefix === "scale-x") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`scaleX(${value})`);
+                        }
+                        else if (prefix === "scale-y") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`scaleY(${value})`);
+                        }
+                        else if (prefix === "scale") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`scale(${value})`);
+                        }
+                        else if (prefix === "rotate") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`rotate(${value}deg)`);
+                        }
+                        else if (prefix === "translate-x") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`translateX(${value})`);
+                        }
+                        else if (prefix === "translate-y") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`translateY(${value})`);
+                        }
+                        else if (prefix === "skew-x") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`skewX(${value}deg)`);
+                        }
+                        else if (prefix === "skew-y") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                transformComponents.push(`skewY(${value}deg)`);
+                        }
+                    });
+                    if (transformComponents.length > 0) {
+                        rule.append(new postcss_1.Declaration({
+                            prop: "transform",
+                            value: transformComponents.join(" "),
+                        }));
+                    }
+                }
+                if (filterDeclarations.length > 0) {
+                    const filterComponents = [];
+                    filterDeclarations.forEach((decl) => {
+                        const className = decl.value;
+                        const parts = className.split("-");
+                        const prefix = parts[0];
+                        const suffix = parts.slice(1).join("-");
+                        if (prefix === "blur") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`blur(${value})`);
+                        }
+                        else if (prefix === "brightness") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`brightness(${value})`);
+                        }
+                        else if (prefix === "contrast") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`contrast(${value})`);
+                        }
+                        else if (prefix === "drop-shadow") {
+                            const value = get(mergedConfig.theme.boxShadow, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`drop-shadow(${value})`);
+                        }
+                        else if (prefix === "grayscale") {
+                            filterComponents.push(`grayscale(1)`);
+                        }
+                        else if (prefix === "hue-rotate") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`hue-rotate(${value}deg)`);
+                        }
+                        else if (prefix === "invert") {
+                            filterComponents.push(`invert(1)`);
+                        }
+                        else if (prefix === "saturate") {
+                            const value = get(mergedConfig.theme.opacity, suffix);
+                            if (value !== undefined)
+                                filterComponents.push(`saturate(${value})`);
+                        }
+                        else if (prefix === "sepia") {
+                            filterComponents.push(`sepia(1)`);
+                        }
+                    });
+                    if (filterComponents.length > 0) {
+                        rule.append(new postcss_1.Declaration({
+                            prop: "filter",
+                            value: filterComponents.join(" "),
+                        }));
+                    }
+                }
+                if (backdropFilterDeclarations.length > 0) {
+                    const backdropFilterComponents = [];
+                    backdropFilterDeclarations.forEach((decl) => {
+                        const className = decl.value;
+                        const parts = className.split("-");
+                        const prefix = parts[0];
+                        const suffix = parts.slice(1).join("-");
+                        if (prefix === "backdrop-blur") {
+                            const value = get(mergedConfig.theme.spacing, suffix);
+                            if (value !== undefined)
+                                backdropFilterComponents.push(`blur(${value})`);
+                        }
+                    });
+                    if (backdropFilterComponents.length > 0) {
+                        rule.append(new postcss_1.Declaration({
+                            prop: "backdrop-filter",
+                            value: backdropFilterComponents.join(" "),
+                        }));
+                    }
+                }
+            });
+            console.log("RelaxCSS plugin finished processing.");
+        },
+    };
+    // --- END PATCHED PLUGIN BODY ---
+};
+patchedPlugin.postcss = true;
+module.exports = patchedPlugin;
