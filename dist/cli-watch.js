@@ -381,20 +381,17 @@ function processFiles() {
     const files = glob.sync(srcGlob);
     let combinedCss = "";
     let foundClasses = new Set();
-    console.log(`[RelaxCSS] Processing files matching: ${files}`);
     files.forEach((file) => {
         const ext = path_1.default.extname(file).toLowerCase().replace(/^\./, "");
         const content = fs_1.default.readFileSync(file, "utf8");
         if (ext === "css") {
             combinedCss += content + "\n";
             extractApplyClasses(content).forEach((cls) => {
-                console.log(`[RelaxCSS] Found @apply class: ${cls}`);
                 foundClasses.add(cls);
             });
         }
         else if (fileExtensions.includes(ext)) {
             extractClassNames(content).forEach((cls) => {
-                console.log(`[RelaxCSS] Found class in ${file}: ${cls}`);
                 foundClasses.add(cls);
             });
         }

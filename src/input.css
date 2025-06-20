@@ -1,5 +1,5 @@
 /* src/input.css */
-@import "base.css";
+/* @import "base.css"; */
 
 @relax;
 
@@ -8,5 +8,9 @@
 }
 
 .my-box {
-  @apply fancy-border;
+  @apply fancy-border dark:p-4;
+}
+
+.ravi {
+  @apply text-2xl;
 }

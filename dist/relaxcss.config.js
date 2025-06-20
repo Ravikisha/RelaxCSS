@@ -1,6 +1,11 @@
 // relaxcss.config.js
 const postcss = require('postcss');
 module.exports = {
+  preflight: {
+    enabled: true, // or false to disable all
+    disableSections: ['box-sizing', 'list-style'], // disables only these parts
+    overrides: 'body { background: #fafafa; }' // custom CSS injected at the top
+  },
   plugins: [
     function ({ addUtilities, config }) {
       addUtilities({

@@ -40,6 +40,11 @@ interface RelaxConfig {
     pseudoClasses: string[];
   };
   plugins?: RelaxPlugin[];
+  preflight?: {
+    enabled?: boolean;
+    overrides?: string; // User can provide custom CSS string to override the reset
+    disableSections?: string[]; // List of section keys to disable (e.g., ['box-sizing', 'margin-padding'])
+  };
 }
 
 const defaultConfig: RelaxConfig = {
@@ -344,6 +349,11 @@ const defaultConfig: RelaxConfig = {
       "group-hover", // Added this common variant
     ],
   },
+  preflight: {
+    enabled: true, // or false to disable all
+    disableSections: ['box-sizing', 'list-style'], // disables only these parts
+    overrides: 'body { background: #fafafa; }' // custom CSS injected at the top
+  }
 };
 
 // --- 2. Helper Functions ---
@@ -1806,6 +1816,45 @@ const patchedPlugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
           }
         });
       });
+
+      // Preflight/Base Styles Injection
+      const preflightConfig = mergedConfig.preflight || {};
+      if (preflightConfig.enabled !== false) {
+        // Default preflight sections
+        const preflightSections: Record<string, string> = {
+          'box-sizing': `*,*::before,*::after{box-sizing:border-box;}`,
+          'margin-padding': `body,h1,h2,h3,h4,h5,h6,p,ul,ol,li,figure,figcaption,blockquote,dl,dd{margin:0;padding:0;}`,
+          'list-style': `ul:not([class]),ol:not([class]){list-style:none;}`,
+          'font-family': `body{font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif;line-height:1.5;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}`,
+          'media': `img,picture,video,canvas,svg{display:block;max-width:100%;}`,
+          'form': `button,input,optgroup,select,textarea{font-family:inherit;font-size:100%;line-height:1.15;margin:0;}`,
+          'table': `table{border-collapse:collapse;}th,td{padding:0;}`
+        };
+        // Remove disabled sections
+        const enabledSections = Object.keys(preflightSections).filter(
+          key => !preflightConfig.disableSections?.includes(key)
+        );
+        // Remove any existing preflight rules (if re-running)
+        root.walkComments(comment => {
+          if (comment.text && comment.text.includes('RelaxCSS Preflight')) {
+            comment.remove();
+          }
+        });
+        // Inject enabled preflight sections
+        enabledSections.forEach(key => {
+          root.prepend(
+            new (require('postcss').Comment)({ text: `RelaxCSS Preflight: ${key}` })
+          );
+          root.prepend(preflightSections[key]);
+        });
+        // Inject user overrides if provided
+        if (preflightConfig.overrides && preflightConfig.overrides.trim()) {
+          root.prepend(
+            new (require('postcss').Comment)({ text: 'RelaxCSS Preflight: user overrides' })
+          );
+          root.prepend(preflightConfig.overrides);
+        }
+      }
 
       // The rest of the plugin body is unchanged (aggregation, etc.)
       root.walkRules((rule) => {
