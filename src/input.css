@@ -4,13 +4,5 @@
 @relax;
 
 .container {
-  @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 md:hover:px-8 hover:bg-gray-100 focus:bg-gray-800 transition-colors duration-300 ease-in-out;
-}
-
-.box {
-  @apply bg-[#222] shadow-md rounded-lg p-6 flex flex-col items-center sm:hover:bg-gray-800;
-}
-
-.ravi {
-  @apply bg-[#222] p-[1.5rem] rounded-lg shadow-lg flex flex-col items-center;
+  @apply flex bg-[#222] md:hover:bg-[#333];
 }

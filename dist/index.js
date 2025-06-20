@@ -1020,6 +1020,10 @@ const plugin = (opts) => {
         postcssPlugin: "relax-css",
         Once(root) {
             console.log("RelaxCSS plugin started.");
+            // Remove all @import at-rules from the root
+            root.walkAtRules("import", (atRule) => {
+                atRule.remove();
+            });
             // This map will store the generated declarations for *base* utility classes
             // E.g., 'px-4' -> [padding-left: 1rem, padding-right: 1rem]
             const generatedUtilityDeclarations = new Map();
@@ -1467,7 +1471,7 @@ const plugin = (opts) => {
 plugin.postcss = true;
 // Support for custom input like bg-[#222], p-[4px], etc.
 function parseArbitraryValue(className, config) {
-    // e.g. bg-[#222], p-[4px], text-[red], w-[100px]
+    // e.g. bg-[#222], p-[4px], text-[red], w-[100px], m-[1rem], etc.
     const arbitraryMatch = className.match(/^([a-z-]+)-\[(.+)\]$/i);
     if (!arbitraryMatch)
         return [];
@@ -1548,7 +1552,7 @@ function parseArbitraryValue(className, config) {
             return [new postcss_1.Declaration({ prop: prefix, value })];
         default:
             // fallback: try to use as property directly (dangerous, but useful for advanced users)
-            return [];
+            return [new postcss_1.Declaration({ prop: prefix, value })];
     }
 }
 // Patch generateUtilityCss to support arbitrary values
@@ -1571,6 +1575,10 @@ const patchedPlugin = (opts) => {
         postcssPlugin: "relax-css",
         Once(root) {
             console.log("RelaxCSS plugin started.");
+            // Remove all @import at-rules from the root
+            root.walkAtRules("import", (atRule) => {
+                atRule.remove();
+            });
             const generatedUtilityDeclarations = new Map();
             const allPossibleUtilityClasses = new Set();
             Object.keys(mergedConfig.theme).forEach((themeSectionKey) => {
@@ -1603,12 +1611,14 @@ const patchedPlugin = (opts) => {
                             allPossibleUtilityClasses.add(`inset-${key}`);
                             allPossibleUtilityClasses.add(`inset-x-${key}`);
                             allPossibleUtilityClasses.add(`inset-y-${key}`);
+                            // Add 'auto' for margin
                             if (key === "auto") {
                                 allPossibleUtilityClasses.add(`m-auto`);
                                 allPossibleUtilityClasses.add(`mx-auto`);
                                 allPossibleUtilityClasses.add(`my-auto`);
                             }
                         }
+                        // Max-width/Height (uses its own scales)
                         else if (themeSectionKey === "maxWidth") {
                             allPossibleUtilityClasses.add(`max-w-${key}`);
                         }
@@ -1648,6 +1658,7 @@ const patchedPlugin = (opts) => {
                             allPossibleUtilityClasses.add(`rounded-${key}`);
                         else if (themeSectionKey === "borderWidth")
                             allPossibleUtilityClasses.add(`border-${key}`);
+                        // Default border-width is handled in generateUtilityCss
                         else if (themeSectionKey === "gridTemplateColumns")
                             allPossibleUtilityClasses.add(`grid-cols-${key}`);
                         else if (themeSectionKey === "gridTemplateRows")
@@ -1663,18 +1674,19 @@ const patchedPlugin = (opts) => {
                     });
                 }
             });
+            // Add hardcoded utilities
             allPossibleUtilityClasses.add("block");
             allPossibleUtilityClasses.add("inline");
             allPossibleUtilityClasses.add("inline-block");
             allPossibleUtilityClasses.add("hidden");
-            allPossibleUtilityClasses.add("flex");
-            allPossibleUtilityClasses.add("grid");
+            allPossibleUtilityClasses.add("flex"); // display: flex
+            allPossibleUtilityClasses.add("grid"); // display: grid
             allPossibleUtilityClasses.add("static");
             allPossibleUtilityClasses.add("relative");
             allPossibleUtilityClasses.add("absolute");
             allPossibleUtilityClasses.add("fixed");
             allPossibleUtilityClasses.add("sticky");
-            allPossibleUtilityClasses.add("border");
+            allPossibleUtilityClasses.add("border"); // default border
             allPossibleUtilityClasses.add("sr-only");
             allPossibleUtilityClasses.add("not-sr-only");
             allPossibleUtilityClasses.add("justify-start");
@@ -1710,6 +1722,8 @@ const patchedPlugin = (opts) => {
             allPossibleUtilityClasses.add("overflow-y-visible");
             allPossibleUtilityClasses.add("overflow-y-scroll");
             allPossibleUtilityClasses.add("overflow-y-clip");
+            // Add more as needed based on your `generateUtilityCss` switch cases
+            // Generate declarations for all base utilities and store them
             allPossibleUtilityClasses.forEach((className) => {
                 const declarations = generateUtilityCssWithArbitrary(className, mergedConfig);
                 if (declarations.length > 0) {
@@ -1737,7 +1751,7 @@ const patchedPlugin = (opts) => {
             });
             atApplyQueue.forEach(({ rule: parentRule, classes: appliedClasses }) => {
                 appliedClasses.forEach((cls) => {
-                    var _a;
+                    var _a, _b;
                     let baseClassToApply = cls;
                     let mediaQueryVariant;
                     let pseudoClassVariants = [];
@@ -1762,7 +1776,9 @@ const patchedPlugin = (opts) => {
                     if (declarationsToApply && declarationsToApply.length > 0) {
                         let targetRule = parentRule;
                         let currentSelector = parentRule.selector;
+                        // Apply pseudo-classes to the selector if present
                         if (pseudoClassVariants.length > 0) {
+                            // Create a new rule with the combined selector for pseudo-classes
                             let combinedPseudoSelector = currentSelector;
                             pseudoClassVariants.forEach((pseudo) => {
                                 if (pseudo === "group-hover") {
@@ -1772,6 +1788,8 @@ const patchedPlugin = (opts) => {
                                     combinedPseudoSelector += `:${pseudo}`;
                                 }
                             });
+                            // --- Support stacking of responsive and pseudo variants ---
+                            // If we have a mediaQueryVariant, wrap the pseudo rule in the media query
                             if (mediaQueryVariant) {
                                 const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
                                 let mqAtRule = mediaQueries.get(mqParam);
@@ -1783,6 +1801,7 @@ const patchedPlugin = (opts) => {
                                     mediaQueries.set(mqParam, mqAtRule);
                                     root.append(mqAtRule);
                                 }
+                                // Create a new rule with the modified selector inside the media query
                                 targetRule = new postcss_1.Rule({
                                     selector: combinedPseudoSelector,
                                 });
@@ -1790,14 +1809,26 @@ const patchedPlugin = (opts) => {
                                 mqAtRule.append(targetRule);
                             }
                             else {
+                                // No media query, just append the pseudo rule to the parent
                                 targetRule = new postcss_1.Rule({
                                     selector: combinedPseudoSelector,
                                 });
                                 declarationsToApply.forEach((d) => targetRule.append(d.clone()));
                                 (_a = parentRule.parent) === null || _a === void 0 ? void 0 : _a.append(targetRule);
                             }
+                            // If we have pseudo-classes, we don't need to apply them again
+                            return;
+                            // Create a new rule with the modified selector
+                            targetRule = new postcss_1.Rule({
+                                selector: combinedPseudoSelector,
+                            });
+                            // Append the new rule to the parent rule
+                            (_b = parentRule.parent) === null || _b === void 0 ? void 0 : _b.append(targetRule);
+                            declarationsToApply.forEach((d) => targetRule.append(d.clone()));
+                            // If we have pseudo-classes, we don't need to apply them again
                             return;
                         }
+                        // Handle responsive variants by creating a new rule inside a media query
                         if (mediaQueryVariant) {
                             const mqParam = `(min-width: ${mergedConfig.theme.screens[mediaQueryVariant]})`;
                             let mqAtRule = mediaQueries.get(mqParam);
@@ -1807,8 +1838,9 @@ const patchedPlugin = (opts) => {
                                     params: mqParam,
                                 });
                                 mediaQueries.set(mqParam, mqAtRule);
-                                root.append(mqAtRule);
+                                root.append(mqAtRule); // Append media query to root once
                             }
+                            // Create a new rule inside the media query, with the parent's selector
                             const newResponsiveRule = new postcss_1.Rule({
                                 selector: parentRule.selector,
                             });
@@ -1816,6 +1848,7 @@ const patchedPlugin = (opts) => {
                             mqAtRule.append(newResponsiveRule);
                         }
                         else {
+                            // No media query, append declarations directly to the parent rule
                             declarationsToApply.forEach((d) => parentRule.append(d.clone()));
                         }
                     }
@@ -1866,7 +1899,7 @@ const patchedPlugin = (opts) => {
                                 transformComponents.push(`scale(${value})`);
                         }
                         else if (prefix === "rotate") {
-                            const value = get(mergedConfig.theme.spacing, suffix);
+                            const value = get(mergedConfig.theme.spacing, suffix); // assuming spacing has angle values like '45' for 45deg
                             if (value !== undefined)
                                 transformComponents.push(`rotate(${value}deg)`);
                         }

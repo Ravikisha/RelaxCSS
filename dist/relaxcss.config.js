@@ -1,5 +1,6 @@
 // relaxcss.config.js
 module.exports = {
+  fileExtensions: ["css", "html", "js", "jsx", "ts", "tsx", "vue", "svelte"],
   theme: {
     colors: {
       primary: '#3490dc',
