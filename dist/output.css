@@ -114,4 +114,14 @@ td {
   padding: 0;
 }
 
+.m-4 { margin: 1rem; }
+.hover\:bg-blue-500:hover { background-color: #3b82f6;
+}
+.hover\:text-white:hover {
+}
+@media (min-width: 768px) {
+  .md\:hover\:bg-blue-700:hover { background-color: #1d4ed8;
+  }
+}
+.bg-[#222] { background-color: #222; }
 @media (min-width: 768px) {.container:hover { background-color: #333; } }

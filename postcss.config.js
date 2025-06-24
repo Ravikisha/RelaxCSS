@@ -19,20 +19,20 @@ module.exports = {
     relaxcss({ config: './relaxcss.config.js' }),
     autoprefixer(),
     // PurgeCSS usually goes last to remove unused CSS
-    // purgecss({
-    //   content: [
-    //     './public/**/*.html',
-    //     './src/**/*.js',
-    //     './src/**/*.jsx',
-    //     './src/**/*.ts',
-    //     './src/**/*.tsx',
-    //     './src/**/*.vue',
-    //   ],
-    //   defaultExtractor: content => content.match(/[\w-/.:]+(?<!:)/g) || [],
-    //   safelist: {
-    //     standard: ['body', 'html'],
-    //     greedy: [/^(sm:|md:|lg:|xl:|2xl:)/]
-    //   },
-    // }),
+    purgecss({
+      content: [
+        './public/**/*.html',
+        './src/**/*.js',
+        './src/**/*.jsx',
+        './src/**/*.ts',
+        './src/**/*.tsx',
+        './src/**/*.vue',
+      ],
+      defaultExtractor: content => content.match(/[\w-/.:]+(?<!:)/g) || [],
+      safelist: {
+        standard: ['body', 'html'],
+        greedy: [/^(sm:|md:|lg:|xl:|2xl:)/]
+      },
+    }),
   ],
 };

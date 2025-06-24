@@ -369,7 +369,7 @@ function extractClassNames(content: string): string[] {
     matches.push(...match[1].split(/\s+/).filter(Boolean));
   }
   console.log(`[RelaxCSS] Found classes: ${matches.join(", ")}`);
-  return matches.filter((cls => !cls.startsWith("..."))); // Exclude RelaxCSS classes
+  return matches.filter((cls) => !cls.startsWith("...")); // Exclude RelaxCSS classes
 }
 
 // Utility: Extract @apply classes from CSS
@@ -389,6 +389,7 @@ function processFiles() {
 
   let combinedCss = "";
   let foundClasses = new Set<string>();
+  let classNameFoundClasses = new Set<string>();
 
   console.log(`[RelaxCSS] Processing files matching: ${files}`);
 
@@ -404,15 +405,43 @@ function processFiles() {
     } else if (fileExtensions.includes(ext)) {
       extractClassNames(content).forEach((cls) => {
         foundClasses.add(cls);
+        classNameFoundClasses.add(cls);
       });
     }
   });
 
-  console.log(`[RelaxCSS] Found ${foundClasses.size} unique classes: ${[...foundClasses].join(", ")}`);
+  console.log(
+    `[RelaxCSS] Found ${foundClasses.size} unique classes: ${[
+      ...foundClasses,
+    ].join(", ")}`
+  );
+
+  // compile the found classes
+  const foundClassesCss =
+    "" +
+    Array.from(classNameFoundClasses)
+      .map((cls) => {
+        /* 
+hover:bg-blue-700  => 
+          .hover\:bg-blue-700:hover {
+  --tw-bg-opacity: 1;
+  background-color: rgba(29, 78, 216, var(--tw-bg-opacity));
+}
+          */
+        // manage the pseudo-classes, get the theme screen for all pseudo-classes available
+        const variantRule = generateTailwindVariantRule(cls, defaultConfig);
+        if (variantRule) {
+          return variantRule;
+        }
+        return `.${cls} { @apply ${cls}; }`;
+      })
+      .join("\n");
+
+  // combinedCss += foundClassesCss;
 
   // Do NOT generate a "JIT" CSS file for found classes (handled by plugin)
   // Only pass the combinedCss (with @apply) to PostCSS
-  const finalCss = combinedCss;
+  const finalCss = combinedCss + "\n" + foundClassesCss;
 
   postcss([relaxcss()])
     .process(finalCss, { from: undefined })
@@ -437,3 +466,43 @@ watcher.on("all", (event, filePath) => {
   console.log(`[RelaxCSS] Detected ${event} in ${filePath}. Rebuilding...`);
   processFiles();
 });
+
+function generateTailwindVariantRule(
+  cls: string,
+  defaultConfig: any
+): string | null {
+  // Handle combined responsive + pseudo (e.g., md:hover:bg-blue-500)
+  for (const screen of defaultConfig.variants.responsive) {
+    if (cls.startsWith(`${screen}:`)) {
+      const remaining = cls.slice(screen.length + 1); // remove screen:
+      for (const pseudo of defaultConfig.variants.pseudoClasses) {
+        if (remaining.startsWith(`${pseudo}:`)) {
+          const utility = remaining.slice(pseudo.length + 1); // remove pseudo:
+          return `@media (min-width: ${defaultConfig.theme.screens[screen]}) {
+  .${screen}\\:${pseudo}\\:${utility}:${pseudo} {
+    @apply ${utility};
+  }
+}`;
+        }
+      }
+      // Only responsive
+      return `@media (min-width: ${defaultConfig.theme.screens[screen]}) {
+  .${screen}\\:${remaining} {
+    @apply ${remaining};
+  }
+}`;
+    }
+  }
+
+  // Only pseudo
+  for (const pseudo of defaultConfig.variants.pseudoClasses) {
+    if (cls.startsWith(`${pseudo}:`)) {
+      const utility = cls.slice(pseudo.length + 1); // remove pseudo:
+      return `.${pseudo}\\:${utility}:${pseudo} {
+  @apply ${utility};
+}`;
+    }
+  }
+
+  return null;
+}
