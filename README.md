@@ -1,4 +1,6 @@
-<img src="https://ravikisha.github.io/assets/relaxcss_logo.png" alt="RelaxCSS Logo" width="200" style="display: block; margin: 0 auto; border-radius: 8px;" align="center">
+<p align="center">
+<img src="https://ravikisha.github.io/assets/relaxcss_logo.png" alt="RelaxCSS Logo" width="200">
+</p>
 <h1 align="center">RelaxCSS</h1>
 
 <p float="left" align="center">
