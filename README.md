@@ -1,4 +1,4 @@
-<img src="https://ravikisha.github.io/assets/relaxcss_logo.png" alt="RelaxCSS Logo" width="200" style="display: block; margin: 0 auto; border-radius: 8px;" />
+<img src="https://ravikisha.github.io/assets/relaxcss_logo.png" alt="RelaxCSS Logo" width="200" style="display: block; margin: 0 auto; border-radius: 8px;" align="center">
 <h1 align="center">RelaxCSS</h1>
 
 <p float="left" align="center">
@@ -6,7 +6,6 @@
 <img src="https://shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=000&style=flat-square" alt="JavaScript Logo" />
 <img src="https://shields.io/badge/PostCSS-000000?logo=PostCSS&logoColor=FFF&style=flat-square" alt="PostCSS Logo" />
 <img src="https://shields.io/badge/Node.js-339933?logo=Node.js&logoColor=FFF&style=flat-square" alt="Node.js Logo" />
-<img src="https://shields.io/badge/CLI-000000?logo=Command Line&logoColor=FFF&style=flat-square" alt="CLI Logo" />
 <img src="https://shields.io/badge/License-MIT-blue?style=flat-square" alt="MIT License" />
 
 </p>
