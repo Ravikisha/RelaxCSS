@@ -1,6 +1,6 @@
 {
   "name": "relaxcss",
-  "version": "1.1.0",
+  "version": "1.0.1",
   "description": "A Tailwind-like JIT CSS engine and PostCSS plugin with plugin system, variants, dark mode, RTL, and CSS variable support.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
