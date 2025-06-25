@@ -13,7 +13,9 @@
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "test": "npm run build && jest",
+    "test:coverage": "npm run build && jest --coverage"
   },
   "keywords": [
     "postcss",

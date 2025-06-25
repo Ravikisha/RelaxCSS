@@ -36,13 +36,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.defaultConfig = void 0;
 const chokidar_1 = __importDefault(require("chokidar"));
 const postcss_1 = __importDefault(require("postcss"));
 const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const index_1 = __importDefault(require("./index"));
 const glob = __importStar(require("glob"));
-const defaultConfig = {
+exports.defaultConfig = {
     fileExtensions: ["css", "html", "js", "jsx", "ts", "tsx", "vue", "svelte"],
     theme: {
         screens: {
@@ -338,7 +339,7 @@ const defaultConfig = {
 function getFileExtensionsFromConfig() {
     // Try to get from config, fallback to common web extensions
     // You can extend this to read from a config file if needed
-    const configExts = (defaultConfig === null || defaultConfig === void 0 ? void 0 : defaultConfig.fileExtensions) || [
+    const configExts = (exports.defaultConfig === null || exports.defaultConfig === void 0 ? void 0 : exports.defaultConfig.fileExtensions) || [
         "css",
         "html",
         "js",
@@ -365,7 +366,6 @@ function extractClassNames(content) {
     while ((match = classRegex.exec(content))) {
         matches.push(...match[1].split(/\s+/).filter(Boolean));
     }
-    console.log(`[RelaxCSS] Found classes: ${matches.join(", ")}`);
     return matches.filter((cls) => !cls.startsWith("...")); // Exclude RelaxCSS classes
 }
 // Utility: Extract @apply classes from CSS
@@ -376,7 +376,6 @@ function extractApplyClasses(content) {
     while ((match = applyRegex.exec(content))) {
         matches.push(...match[1].split(/\s+/).filter(Boolean));
     }
-    console.log(`[RelaxCSS] Found @apply classes: ${matches.join(", ")}`);
     return matches;
 }
 function processFiles() {
@@ -384,7 +383,6 @@ function processFiles() {
     let combinedCss = "";
     let foundClasses = new Set();
     let classNameFoundClasses = new Set();
-    console.log(`[RelaxCSS] Processing files matching: ${files}`);
     files.forEach((file) => {
         const ext = path_1.default.extname(file).toLowerCase().replace(/^\./, "");
         const content = fs_1.default.readFileSync(file, "utf8");
@@ -401,9 +399,6 @@ function processFiles() {
             });
         }
     });
-    console.log(`[RelaxCSS] Found ${foundClasses.size} unique classes: ${[
-        ...foundClasses,
-    ].join(", ")}`);
     // compile the found classes
     const foundClassesCss = "" +
         Array.from(classNameFoundClasses)
@@ -416,7 +411,7 @@ function processFiles() {
     }
               */
             // manage the pseudo-classes, get the theme screen for all pseudo-classes available
-            const variantRule = generateTailwindVariantRule(cls, defaultConfig);
+            const variantRule = generateTailwindVariantRule(cls, exports.defaultConfig);
             if (variantRule) {
                 return variantRule;
             }

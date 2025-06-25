@@ -1,6 +1,7 @@
 // relaxcss.config.js
 const postcss = require('postcss');
 module.exports = {
+  darkMode: 'both', // Enables dark mode support
   preflight: {
     enabled: true, // or false to disable all
     disableSections: ['box-sizing', 'list-style'], // disables only these parts

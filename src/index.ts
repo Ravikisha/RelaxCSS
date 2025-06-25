@@ -50,6 +50,7 @@ interface RelaxConfig {
 }
 
 const defaultConfig: RelaxConfig = {
+  darkMode: "media", // Default dark mode strategy
   plugins: [
     function ({ addUtilities, config }) {
       addUtilities({
@@ -359,6 +360,18 @@ const defaultConfig: RelaxConfig = {
 };
 
 // --- 2. Helper Functions ---
+// Utility: Wrap selector for dark mode
+function wrapWithDarkMode(selector: string, config: RelaxConfig): string[] {
+  if (config.darkMode === 'class') {
+    return [`.dark ${selector}`];
+  } else if (config.darkMode === 'media') {
+    return [`@media (prefers-color-scheme: dark) { ${selector} }`];
+  } else if (config.darkMode === 'both') {
+    return [`.dark ${selector}`, `@media (prefers-color-scheme: dark) { ${selector} }`];
+  }
+  return [selector];
+}
+
 // Universal getter for theme values
 function get(obj: any, path: string, defaultValue?: any): any {
   const travel = (regexp: RegExp) =>
@@ -516,14 +529,29 @@ function generateUtilityCss(
   else {
     switch (prefix) {
       case "text":
-        // Handle text color (e.g., text-blue-500)
+        // Handle text color (e.g., text-blue-500, text-primary, text-gray-900)
         if (suffix.includes("-")) {
-          const colorValue = getColor(suffix);
-          if (colorValue)
+          // Try nested color (e.g., blue-500)
+          const [colorKey, colorShade] = suffix.split("-");
+          const colorSection = get(config.theme.colors, colorKey);
+          if (typeof colorSection === "object" && colorSection !== null && colorShade && colorSection[colorShade]) {
+            declarations.push(
+              new Declaration({ prop: "color", value: colorSection[colorShade] })
+            );
+          } else if (typeof colorSection === "string") {
+            // e.g., text-primary
+            declarations.push(
+              new Declaration({ prop: "color", value: colorSection })
+            );
+          }
+        } else {
+          // Try direct color (e.g., text-primary)
+          const colorValue = get(config.theme.colors, suffix);
+          if (typeof colorValue === "string") {
             declarations.push(
               new Declaration({ prop: "color", value: colorValue })
             );
-        } else {
+          }
           // Handle font size (e.g., text-xl)
           const fontSizeTuple = get(config.theme.fontSize, suffix);
           if (Array.isArray(fontSizeTuple)) {
@@ -542,115 +570,129 @@ function generateUtilityCss(
         }
         break;
       case "bg":
-        // Handle background color (e.g., bg-blue-500)
+        // Handle background color (e.g., bg-blue-500, bg-primary, bg-gray-900)
         if (suffix.includes("-")) {
-          const colorValue = getColor(suffix);
-          if (colorValue)
+          // Try nested color (e.g., blue-500)
+          const [colorKey, colorShade] = suffix.split("-");
+          const colorSection = get(config.theme.colors, colorKey);
+          if (typeof colorSection === "object" && colorSection !== null && colorShade && colorSection[colorShade]) {
+            declarations.push(
+              new Declaration({ prop: "background-color", value: colorSection[colorShade] })
+            );
+          } else if (typeof colorSection === "string") {
+            // e.g., bg-primary
+            declarations.push(
+              new Declaration({ prop: "background-color", value: colorSection })
+            );
+          }
+        } else {
+          // Try direct color (e.g., bg-primary)
+          const colorValue = get(config.theme.colors, suffix);
+          if (typeof colorValue === "string") {
             declarations.push(
               new Declaration({ prop: "background-color", value: colorValue })
             );
-        }
-        // Handle other bg-* utilities
-        else if (suffix === "fixed")
-          declarations.push(
-            new Declaration({ prop: "background-attachment", value: "fixed" })
-          );
-        else if (suffix === "local")
-          declarations.push(
-            new Declaration({ prop: "background-attachment", value: "local" })
-          );
-        else if (suffix === "scroll")
-          declarations.push(
-            new Declaration({ prop: "background-attachment", value: "scroll" })
-          );
-        else if (suffix.startsWith("clip-")) {
-          declarations.push(
-            new Declaration({
-              prop: "background-clip",
-              value: suffix.substring(5),
-            })
-          );
-        } else if (suffix.startsWith("origin-")) {
-          declarations.push(
-            new Declaration({
-              prop: "background-origin",
-              value: suffix.substring(7),
-            })
-          );
-        } else if (
-          ["bottom", "center", "left", "right", "top"].includes(suffix)
-        ) {
-          declarations.push(
-            new Declaration({ prop: "background-position", value: suffix })
-          );
-        } else if (
-          suffix.match(/^(left|right|top|bottom)-(top|bottom|left|right)$/)
-        ) {
-          declarations.push(
-            new Declaration({
-              prop: "background-position",
-              value: suffix.replace("-", " "),
-            })
-          );
-        } else if (suffix === "no-repeat")
-          declarations.push(
-            new Declaration({ prop: "background-repeat", value: "no-repeat" })
-          );
-        else if (suffix === "repeat")
-          declarations.push(
-            new Declaration({ prop: "background-repeat", value: "repeat" })
-          );
-        else if (suffix === "repeat-x")
-          declarations.push(
-            new Declaration({ prop: "background-repeat", value: "repeat-x" })
-          );
-        else if (suffix === "repeat-y")
-          declarations.push(
-            new Declaration({ prop: "background-repeat", value: "repeat-y" })
-          );
-        else if (suffix === "round")
-          declarations.push(
-            new Declaration({ prop: "background-repeat", value: "round" })
-          );
-        else if (suffix === "space")
-          declarations.push(
-            new Declaration({ prop: "background-repeat", value: "space" })
-          );
-        else if (suffix === "auto")
-          declarations.push(
-            new Declaration({ prop: "background-size", value: "auto" })
-          );
-        else if (suffix === "cover")
-          declarations.push(
-            new Declaration({ prop: "background-size", value: "cover" })
-          );
-        else if (suffix === "contain")
-          declarations.push(
-            new Declaration({ prop: "background-size", value: "contain" })
-          );
-        else if (suffix === "none")
-          declarations.push(
-            new Declaration({ prop: "background-image", value: "none" })
-          );
-        else if (suffix.startsWith("gradient-to-")) {
-          const direction = suffix.substring(12);
-          const gradientMap: { [key: string]: string } = {
-            t: "to top",
-            tr: "to top right",
-            r: "to right",
-            br: "to bottom right",
-            b: "to bottom",
-            bl: "to bottom left",
-            l: "to left",
-            tl: "to top left",
-          };
-          if (gradientMap[direction]) {
+          }
+          // Handle other bg-* utilities
+          if (suffix === "fixed")
+            declarations.push(
+              new Declaration({ prop: "background-attachment", value: "fixed" })
+            );
+          else if (suffix === "local")
+            declarations.push(
+              new Declaration({ prop: "background-attachment", value: "local" })
+            );
+          else if (suffix === "scroll")
+            declarations.push(
+              new Declaration({ prop: "background-attachment", value: "scroll" })
+            );
+          else if (suffix.startsWith("clip-")) {
             declarations.push(
               new Declaration({
-                prop: "background-image",
-                value: `linear-gradient(${gradientMap[direction]}, var(--tw-gradient-stops))`,
+                prop: "background-clip",
+                value: suffix.substring(5),
               })
             );
+          } else if (suffix.startsWith("origin-")) {
+            declarations.push(
+              new Declaration({
+                prop: "background-origin",
+                value: suffix.substring(7),
+              })
+            );
+          } else if (["bottom", "center", "left", "right", "top"].includes(suffix)) {
+            declarations.push(
+              new Declaration({ prop: "background-position", value: suffix })
+            );
+          } else if (
+            suffix.match(/^(left|right|top|bottom)-(top|bottom|left|right)$/)
+          ) {
+            declarations.push(
+              new Declaration({
+                prop: "background-position",
+                value: suffix.replace("-", " "),
+              })
+            );
+          } else if (suffix === "no-repeat")
+            declarations.push(
+              new Declaration({ prop: "background-repeat", value: "no-repeat" })
+            );
+          else if (suffix === "repeat")
+            declarations.push(
+              new Declaration({ prop: "background-repeat", value: "repeat" })
+            );
+          else if (suffix === "repeat-x")
+            declarations.push(
+              new Declaration({ prop: "background-repeat", value: "repeat-x" })
+            );
+          else if (suffix === "repeat-y")
+            declarations.push(
+              new Declaration({ prop: "background-repeat", value: "repeat-y" })
+            );
+          else if (suffix === "round")
+            declarations.push(
+              new Declaration({ prop: "background-repeat", value: "round" })
+            );
+          else if (suffix === "space")
+            declarations.push(
+              new Declaration({ prop: "background-repeat", value: "space" })
+            );
+          else if (suffix === "auto")
+            declarations.push(
+              new Declaration({ prop: "background-size", value: "auto" })
+            );
+          else if (suffix === "cover")
+            declarations.push(
+              new Declaration({ prop: "background-size", value: "cover" })
+            );
+          else if (suffix === "contain")
+            declarations.push(
+              new Declaration({ prop: "background-size", value: "contain" })
+            );
+          else if (suffix === "none")
+            declarations.push(
+              new Declaration({ prop: "background-image", value: "none" })
+            );
+          else if (suffix.startsWith("gradient-to-")) {
+            const direction = suffix.substring(12);
+            const gradientMap: { [key: string]: string } = {
+              t: "to top",
+              tr: "to top right",
+              r: "to right",
+              br: "to bottom right",
+              b: "to bottom",
+              bl: "to bottom left",
+              l: "to left",
+              tl: "to top left",
+            };
+            if (gradientMap[direction]) {
+              declarations.push(
+                new Declaration({
+                  prop: "background-image",
+                  value: `linear-gradient(${gradientMap[direction]}, var(--tw-gradient-stops))`,
+                })
+              );
+            }
           }
         }
         break;
@@ -1542,8 +1584,6 @@ const patchedPlugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
     });
   }
 
-  // Patch all usages of generateUtilityCss in the plugin
-  // (copy-paste the plugin code, replacing generateUtilityCss with generateUtilityCssWithArbitrary)
   // --- BEGIN PATCHED PLUGIN BODY ---
   return {
     postcssPlugin: "relax-css",
@@ -1919,6 +1959,63 @@ const patchedPlugin: PluginCreator<Partial<RelaxConfig>> = (opts) => {
           root.prepend(preflightConfig.overrides);
         }
       }
+
+      // Utility class generation logic
+      // --- DARK MODE SUPPORT ---
+      // Helper to wrap rules for dark mode
+      function wrapDarkMode(rule: Rule, darkMode: RelaxConfig["darkMode"]) {
+        if (darkMode === "class") {
+          // .dark .dark\:text-white { ... }
+          const darkRule = rule.clone();
+          darkRule.selectors = darkRule.selectors.map(sel => `.dark ${sel}`);
+          return [darkRule];
+        } else if (darkMode === "media") {
+          // @media (prefers-color-scheme: dark) { .dark\:text-white { ... } }
+          const media = postcss.atRule({ name: "media", params: "(prefers-color-scheme: dark)" });
+          media.append(rule.clone());
+          return [media];
+        } else if (darkMode === "both") {
+          // Both class and media
+          const darkRule = rule.clone();
+          darkRule.selectors = darkRule.selectors.map(sel => `.dark ${sel}`);
+          const media = postcss.atRule({ name: "media", params: "(prefers-color-scheme: dark)" });
+          media.append(rule.clone());
+          return [darkRule, media];
+        } else {
+          // No dark mode
+          return [rule];
+        }
+      }
+
+      // Example: Generate rules for all utility classes (simplified for demo)
+      const allClasses = [
+        ...Array.from(new Set([
+          ...Object.keys(userUtilities),
+          // ...add more generated class names as needed
+        ])),
+      ];
+
+      allClasses.forEach((className) => {
+        let isDark = false;
+        let baseClass = className;
+        if (className.startsWith("dark:")) {
+          isDark = true;
+          baseClass = className.slice(5);
+        }
+        const decls = generateUtilityCssWithArbitrary(baseClass, mergedConfig);
+        if (decls.length > 0) {
+          const selector = isDark
+            ? `.dark\\:${baseClass.replace(/[^a-zA-Z0-9_-]/g, c => `\\${c}`)}`
+            : `.${className.replace(/[^a-zA-Z0-9_-]/g, c => `\\${c}`)}`;
+          const rule = postcss.rule({ selector });
+          decls.forEach((d) => rule.append(d));
+          if (isDark) {
+            wrapDarkMode(rule, mergedConfig.darkMode || "class").forEach((r) => root.append(r));
+          } else {
+            root.append(rule);
+          }
+        }
+      });
 
       // The rest of the plugin body is unchanged (aggregation, etc.)
       root.walkRules((rule) => {

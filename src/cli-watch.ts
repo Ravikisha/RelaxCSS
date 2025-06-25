@@ -1,13 +1,21 @@
 import chokidar from "chokidar";
-import postcss from "postcss";
+import postcss, { Declaration } from "postcss";
 import fs from "fs";
 import path from "path";
 import relaxcss from "./index";
 import * as glob from "glob";
 
 // --- Read file extensions from RelaxCSS config ---
+interface RelaxPlugin {
+  (api: {
+    addUtilities: (
+      utils: Record<string, (config: RelaxConfig) => Declaration[]>
+    ) => void;
+    config: RelaxConfig;
+  }): void;
+}
+
 interface RelaxConfig {
-  fileExtensions: string[]; // Array of file extensions to watch
   theme: {
     screens: { [key: string]: string };
     spacing: { [key: string]: string };
@@ -34,9 +42,18 @@ interface RelaxConfig {
     responsive: string[];
     pseudoClasses: string[];
   };
+  plugins?: RelaxPlugin[];
+  preflight?: {
+    enabled?: boolean;
+    overrides?: string; // User can provide custom CSS string to override the reset
+    disableSections?: string[]; // List of section keys to disable (e.g., ['box-sizing', 'margin-padding'])
+  };
+  darkMode?: 'class' | 'media' | 'both';
+  rtl?: boolean; // NEW: enable RTL logical property support
+  fileExtensions?: string[]; // NEW: allow user to specify file extensions to watch
 }
 
-const defaultConfig: RelaxConfig = {
+export const defaultConfig: RelaxConfig = {
   fileExtensions: ["css", "html", "js", "jsx", "ts", "tsx", "vue", "svelte"],
   theme: {
     screens: {
@@ -368,7 +385,6 @@ function extractClassNames(content: string): string[] {
   while ((match = classRegex.exec(content))) {
     matches.push(...match[1].split(/\s+/).filter(Boolean));
   }
-  console.log(`[RelaxCSS] Found classes: ${matches.join(", ")}`);
   return matches.filter((cls) => !cls.startsWith("...")); // Exclude RelaxCSS classes
 }
 
@@ -380,7 +396,6 @@ function extractApplyClasses(content: string): string[] {
   while ((match = applyRegex.exec(content))) {
     matches.push(...match[1].split(/\s+/).filter(Boolean));
   }
-  console.log(`[RelaxCSS] Found @apply classes: ${matches.join(", ")}`);
   return matches;
 }
 
@@ -391,7 +406,6 @@ function processFiles() {
   let foundClasses = new Set<string>();
   let classNameFoundClasses = new Set<string>();
 
-  console.log(`[RelaxCSS] Processing files matching: ${files}`);
 
   files.forEach((file) => {
     const ext = path.extname(file).toLowerCase().replace(/^\./, "");
@@ -409,12 +423,6 @@ function processFiles() {
       });
     }
   });
-
-  console.log(
-    `[RelaxCSS] Found ${foundClasses.size} unique classes: ${[
-      ...foundClasses,
-    ].join(", ")}`
-  );
 
   // compile the found classes
   const foundClassesCss =
